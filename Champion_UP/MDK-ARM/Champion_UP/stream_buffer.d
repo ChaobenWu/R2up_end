@@ -1,0 +1,14 @@
+champion_up\stream_buffer.o: ../Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c
+champion_up\stream_buffer.o: D:\Keil_v5\ARM\ARM_Compiler_5.06u7\Bin\..\include\stdint.h
+champion_up\stream_buffer.o: D:\Keil_v5\ARM\ARM_Compiler_5.06u7\Bin\..\include\string.h
+champion_up\stream_buffer.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+champion_up\stream_buffer.o: D:\Keil_v5\ARM\ARM_Compiler_5.06u7\Bin\..\include\stddef.h
+champion_up\stream_buffer.o: ../Core/Inc/FreeRTOSConfig.h
+champion_up\stream_buffer.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+champion_up\stream_buffer.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+champion_up\stream_buffer.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+champion_up\stream_buffer.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
+champion_up\stream_buffer.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+champion_up\stream_buffer.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+champion_up\stream_buffer.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
+champion_up\stream_buffer.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/stream_buffer.h

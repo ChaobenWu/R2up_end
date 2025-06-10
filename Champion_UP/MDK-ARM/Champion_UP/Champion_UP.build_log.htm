@@ -1,0 +1,124 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Tool Versions:</h2>
+IDE-Version: ¦ÌVision V5.38.0.0
+Copyright (C) 2022 ARM Ltd and ARM Germany GmbH. All rights reserved.
+License Information: CW 2241855, HP Inc., LIC=UB4EI-T85UZ-353TX-HGKVJ-33TT8-FAMFT
+ 
+Tool Versions:
+Toolchain:       MDK-ARM Professional  Version: 5.38.0.0
+Toolchain Path:  D:\Keil_v5\ARM\ARM_Compiler_5.06u7\Bin
+C Compiler:      Armcc.exe V5.06 update 7 (build 960)
+Assembler:       Armasm.exe V5.06 update 7 (build 960)
+Linker/Locator:  ArmLink.exe V5.06 update 7 (build 960)
+Library Manager: ArmAr.exe V5.06 update 7 (build 960)
+Hex Converter:   FromElf.exe V5.06 update 7 (build 960)
+CPU DLL:         SARMCM3.DLL V5.38.0.0
+Dialog DLL:      DCM.DLL V1.17.5.0
+Target DLL:      Segger\JL2CM3.dll V2.99.15.0
+Dialog DLL:      TCM.DLL V1.56.4.0
+ 
+<h2>Project:</h2>
+E:\1file\roboteam\CONTROL\R2_up_25\Champion_UP\MDK-ARM\Champion_UP.uvprojx
+Project File Date:  06/10/2025
+
+<h2>Output:</h2>
+*** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\Keil_v5\ARM\ARM_Compiler_5.06u7\Bin'
+Build target 'Champion_UP'
+compiling pid.c...
+../TYPES/types.h(311): warning:  #1-D: last line of file ends without a newline
+  #endif // __TYPES_H__
+..\BSP\pid.h(16): warning:  #1-D: last line of file ends without a newline
+  #endif //
+..\BSP\pid.c(139): warning:  #1-D: last line of file ends without a newline
+  }
+..\BSP\pid.c: 3 warnings, 0 errors
+compiling bsp_usart.c...
+../TYPES/types.h(311): warning:  #1-D: last line of file ends without a newline
+  #endif // __TYPES_H__
+..\BSP\bsp_usart.h(9): warning:  #1-D: last line of file ends without a newline
+  #endif //__BSP_USART_H__
+..\BSP\bsp_usart.c(7): warning:  #177-D: variable "row"  was declared but never referenced
+  	float row=0;
+..\BSP\bsp_usart.c: 3 warnings, 0 errors
+compiling robot_init.c...
+../TYPES/types.h(311): warning:  #1-D: last line of file ends without a newline
+  #endif // __TYPES_H__
+..\BSP\robot_init.h(5): warning:  #1-D: last line of file ends without a newline
+  #endif // __ROBOT_INIT_H__
+../LOGIC/logic.h(76): warning:  #1-D: last line of file ends without a newline
+  #endif //__LOGIC_H__
+..\BSP\robot_init.c(17): warning:  #1-D: last line of file ends without a newline
+  }
+..\BSP\robot_init.c: 4 warnings, 0 errors
+compiling logic.c...
+../TYPES/types.h(311): warning:  #1-D: last line of file ends without a newline
+  #endif // __TYPES_H__
+..\LOGIC\logic.h(76): warning:  #1-D: last line of file ends without a newline
+  #endif //__LOGIC_H__
+..\LOGIC\logic.c(463): warning:  #1-D: last line of file ends without a newline
+  }
+..\LOGIC\logic.c: 3 warnings, 0 errors
+compiling types.c...
+..\TYPES\types.h(311): warning:  #1-D: last line of file ends without a newline
+  #endif // __TYPES_H__
+../LOGIC/logic.h(76): warning:  #1-D: last line of file ends without a newline
+  #endif //__LOGIC_H__
+..\TYPES\types.c(277): warning:  #1-D: last line of file ends without a newline
+  }
+..\TYPES\types.c: 3 warnings, 0 errors
+compiling stm32f4xx_it.c...
+../TYPES/types.h(311): warning:  #1-D: last line of file ends without a newline
+  #endif // __TYPES_H__
+../BSP/bsp_usart.h(9): warning:  #1-D: last line of file ends without a newline
+  #endif //__BSP_USART_H__
+../Core/Src/stm32f4xx_it.c: 2 warnings, 0 errors
+compiling bsp_can.c...
+../TYPES/types.h(311): warning:  #1-D: last line of file ends without a newline
+  #endif // __TYPES_H__
+..\BSP\bsp_can.c(298): warning:  #1-D: last line of file ends without a newline
+  }
+..\BSP\bsp_can.c: 2 warnings, 0 errors
+compiling freertos.c...
+../TYPES/types.h(311): warning:  #1-D: last line of file ends without a newline
+  #endif // __TYPES_H__
+../BSP/bsp_usart.h(9): warning:  #1-D: last line of file ends without a newline
+  #endif //__BSP_USART_H__
+../BSP/pid.h(16): warning:  #1-D: last line of file ends without a newline
+  #endif //
+../LOGIC/logic.h(76): warning:  #1-D: last line of file ends without a newline
+  #endif //__LOGIC_H__
+../Core/Src/freertos.c: 4 warnings, 0 errors
+linking...
+Program Size: Code=19936 RO-data=676 RW-data=828 ZI-data=18556  
+FromELF: creating hex file...
+"Champion_UP\Champion_UP.axf" - 0 Error(s), 24 Warning(s).
+
+<h2>Software Packages used:</h2>
+
+Package Vendor: ARM
+                http://www.keil.com/pack/ARM.CMSIS.5.9.0.pack
+                ARM.CMSIS.5.9.0
+                CMSIS (Common Microcontroller Software Interface Standard)
+   * Component: CORE Version: 5.6.0
+
+Package Vendor: Keil
+                http://www.keil.com/pack/Keil.STM32F4xx_DFP.2.13.0.pack
+                Keil.STM32F4xx_DFP.2.13.0
+                STMicroelectronics STM32F4 Series Device Support, Drivers and Examples
+
+<h2>Collection of Component include folders:</h2>
+  ./RTE/_Champion_UP
+  D:/Keil_v5/ARM/Arm/Packs/ARM/CMSIS/5.9.0/CMSIS/Core/Include
+  D:/Keil_v5/ARM/Arm/Packs/Keil/STM32F4xx_DFP/2.13.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include
+
+<h2>Collection of Component Files used:</h2>
+
+   * Component: ARM::CMSIS:CORE:5.6.0
+      Include file:  CMSIS/Core/Include/tz_context.h
+Build Time Elapsed:  00:00:06
+</pre>
+</body>
+</html>
