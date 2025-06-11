@@ -44,7 +44,7 @@
 "champion_up\robot_init.o"
 "champion_up\types.o"
 "champion_up\logic.o"
---strict --scatter "Champion_UP\Champion_UP.sct"
+--library_type=microlib --strict --scatter "Champion_UP\Champion_UP.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
 --list "Champion_UP.map" -o Champion_UP\Champion_UP.axf

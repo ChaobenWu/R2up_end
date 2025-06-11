@@ -4,7 +4,6 @@
 void Usart_Control(ST_COMMAND *my_command,uint8_t rx[])
 {
 	float pitch=0;
-	float row=0;
 	float dapao=0;
 
 		system_monitor.rate_cnt.usart1++;

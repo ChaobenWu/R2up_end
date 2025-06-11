@@ -59,7 +59,7 @@ uint8_t flag_init=0;
 uint8_t flag_home=0;
 uint8_t flag_force=0;
 uint8_t flag_stretch=0;
-void Logic(ST_COMMAND my_command)
+void Logic(const ST_COMMAND my_command)
 {
 		//初始化任务
 			if(my_command.init)

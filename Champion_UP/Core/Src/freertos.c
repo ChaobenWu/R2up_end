@@ -119,27 +119,27 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 256);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of logic */
-  osThreadDef(logic, Logic_Task, osPriorityIdle, 0, 128);
+  osThreadDef(logic, Logic_Task, osPriorityIdle, 0, 256);
   logicHandle = osThreadCreate(osThread(logic), NULL);
 
   /* definition and creation of control */
-  osThreadDef(control, Control_Task, osPriorityIdle, 0, 128);
+  osThreadDef(control, Control_Task, osPriorityIdle, 0, 256);
   controlHandle = osThreadCreate(osThread(control), NULL);
 
   /* definition and creation of monitor */
-  osThreadDef(monitor, Monitor_Task, osPriorityIdle, 0, 128);
+  osThreadDef(monitor, Monitor_Task, osPriorityIdle, 0, 256);
   monitorHandle = osThreadCreate(osThread(monitor), NULL);
 
   /* definition and creation of usartRX */
-  osThreadDef(usartRX, Rx_Task, osPriorityIdle, 0, 128);
+  osThreadDef(usartRX, Rx_Task, osPriorityIdle, 0, 256);
   usartRXHandle = osThreadCreate(osThread(usartRX), NULL);
 
   /* definition and creation of usartTX */
-  osThreadDef(usartTX, Tx_Task, osPriorityIdle, 0, 128);
+  osThreadDef(usartTX, Tx_Task, osPriorityIdle, 0, 256);
   usartTXHandle = osThreadCreate(osThread(usartTX), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -232,17 +232,17 @@ void Monitor_Task(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-		for (int i = 0; i <16 ; i++)
-		{
-       uint16_t fps = *(&system_monitor.rate_fps.motor_pitch+i);
-			if (fps < 950 || fps > 1050) 
-			{
-				*(&system_monitor.system_error.motor_pitch+i)=1;
-			}
-			else{
-				*(&system_monitor.system_error.motor_pitch+i)=0;
-			}
-		}
+//		for (int i = 0; i <16 ; i++)
+//		{
+//       uint16_t fps = *(&system_monitor.rate_fps.motor_pitch+i);
+//			if (fps < 950 || fps > 1050) 
+//			{
+//				*(&system_monitor.system_error.motor_pitch+i)=1;
+//			}
+//			else{
+//				*(&system_monitor.system_error.motor_pitch+i)=0;
+//			}
+//		}
 			vTaskDelay(pdMS_TO_TICKS(1));
   }
   /* USER CODE END Monitor_Task */
@@ -281,15 +281,15 @@ void Tx_Task(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-	usart1_tx_buff[0]=0x66;
-	usart1_tx_buff[1]=desq_catch;
-		for (int i = 0; i < 8; i++) {
-        usart1_tx_buff[2] |= (*(&system_monitor.system_error.motor_pitch+i) << (7 - i));  // ??? 8 ????��
-    }
-    for (int i = 8; i < 16; i++) {
-        usart1_tx_buff[3] |= (*(&system_monitor.system_error.motor_pitch+i) << (15 - i));  // ???? 8 ????��
-    }
-		HAL_UART_Transmit_IT(&huart1,usart1_tx_buff,sizeof(usart1_tx_buff));
+//	usart1_tx_buff[0]=0x66;
+//	usart1_tx_buff[1]=desq_catch;
+//		for (int i = 0; i < 8; i++) {
+//        usart1_tx_buff[2] |= (*(&system_monitor.system_error.motor_pitch+i) << (7 - i));  // ??? 8 ????��
+//    }
+//    for (int i = 8; i < 16; i++) {
+//        usart1_tx_buff[3] |= (*(&system_monitor.system_error.motor_pitch+i) << (15 - i));  // ???? 8 ????��
+//    }
+//		HAL_UART_Transmit_IT(&huart1,usart1_tx_buff,sizeof(usart1_tx_buff));
 		system_monitor.rate_cnt.freertos_tx++;
 		vTaskDelay(pdMS_TO_TICKS(1));
   }

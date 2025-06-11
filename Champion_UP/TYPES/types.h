@@ -230,18 +230,18 @@ typedef struct
 
 typedef struct
 {
-	uint8_t init;
-	uint8_t receive;
-	uint8_t bounce;
-	uint8_t lay;
-	uint8_t aim;
-	uint8_t shot;
-	uint8_t home;
-	uint8_t flag_aim;
-	uint8_t number_aim;
-	uint8_t force;
-	uint8_t stretch;
-	uint8_t air_flag;	
+	int init;
+	int receive;
+	int bounce;
+	int lay;
+	int aim;
+	int shot;
+	int home;
+	int flag_aim;
+	int number_aim;
+	int force;
+	int stretch;
+	int air_flag;	
  ST_SHOT command_shot;
 }ST_COMMAND;
 
@@ -293,7 +293,6 @@ extern ST_PID pid_bounce_right;
 // 系统监控和命令结构
 extern ST_SYSTEM_MONITOR system_monitor;
 extern ST_COMMAND command;
-
 extern ST_SHOT shot[10];
 
 

@@ -136,11 +136,11 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 							system_monitor.rate_cnt.motor_pitch++;
 							break;
 					  case 0x20: // 行程开关
-							if(RxMsg_CAN1[1]==0x80)
+							if((RxMsg_CAN1[1] & 0x08) == 0)
 							{
 								command.air_flag=0;
 							}
-							if(RxMsg_CAN1[1]==0x88)
+							if((RxMsg_CAN1[1] & 0x08) == 0x08)
 							{
 								command.air_flag=1;
 							}

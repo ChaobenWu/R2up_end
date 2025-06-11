@@ -204,7 +204,7 @@ ST_PID pid_shot_mod = {
 
 ST_SYSTEM_MONITOR system_monitor={0};
 
-ST_COMMAND command={0};
+ST_COMMAND command;
 
 
 //备用，当垃圾的时候使用
