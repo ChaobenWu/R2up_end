@@ -1,16 +1,6 @@
 #include "types.h"
 #include "pid.h"
 //***********************************************单环PID版本
-//PID参数初始化
-void PID_Init(ST_PID *pid, float p, float i, float d, float maxErr, float maxI, float maxO)
-{
-    pid->fpKp = p;
-    pid->fpKi = i;
-    pid->fpKd = d;
-    pid->fpEMax = maxErr;
-    pid->fpIMax = maxI;
-    pid->fpOMax = maxO;
-}
 
 
 void PID_Calc(ST_PID *pstPid)
@@ -31,13 +21,13 @@ void PID_Calc(ST_PID *pstPid)
     }
 
     // 积分限幅
-    if (pstPid->fpSumE > pstPid->fpIMax)
+    if (pstPid->fpSumE > pstPid->fpSumEMax)
     {
-        pstPid->fpSumE = pstPid->fpIMax;
+        pstPid->fpSumE = pstPid->fpSumEMax;
     }
-    else if (pstPid->fpSumE < -pstPid->fpIMax)
+    else if (pstPid->fpSumE < -pstPid->fpSumEMax)
     {
-        pstPid->fpSumE = -pstPid->fpIMax;
+        pstPid->fpSumE = -pstPid->fpSumEMax;
     }
     // 计算比例项
     pstPid->fpUKp = pstPid->fpKp * pstPid->fpE;

@@ -37,7 +37,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+float f_current=0;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -180,6 +180,7 @@ void Logic_Task(void const * argument)
   for(;;)
   {
 		Logic(command);
+		//Belt_Shot();
 		system_monitor.rate_cnt.freertos_logic++;
 		vTaskDelay(pdMS_TO_TICKS(1));
   }
@@ -212,7 +213,35 @@ void Control_Task(void const * argument)
 		pid_rotate.inner.fpFB=motor_rotate.anglev;
 		PID_Calc_DualLoop(&pid_rotate);		
 		
+//		if(fabs(fbv_shot)>50)
+//		{
+//			f_current=Sgn(fbv_shot)*2000;
+//		}
+//		else
+//		{
+//			f_current=(fbv_shot)*40;
+//		}
+		
+		if(state==0)
+		{
+		pid_shot_mod.fpDes=desv_shot;
+		pid_shot_mod.fpFB=motor_shot_up.anglev;
+		PID_Calc(&pid_shot_mod);
+		LESO_Order1(&order, motor_shot_up.anglev,pid_shot_mod.fpU);		
+		CAN_SendCurrent(&hcan1,0x200,order.U,order.U,0,0);		
+		}
+		if(state==1)
+		{
+			pid_shot.outer.fpDes=des_shot;
+			pid_shot.outer.fpFB=motor_shot_up.angle;
+			pid_shot.inner.fpFB=motor_shot_up.anglev;
+			PID_Calc_DualLoop(&pid_shot);
+		CAN_SendCurrent(&hcan1,0x200,pid_shot.output,pid_shot.output,0,0);				
+		}
+
 		CAN_SendCurrent(&hcan2,0x200,pid_rotate.output,pid_bounce_right.fpU,pid_bounce_left.fpU,0);
+	//	CAN_SendCurrent(&hcan1,0x200,pid_shot_mod.fpU+f_current,pid_shot_mod.fpU+f_current,0,0);
+
 		SendSwitchValue(desq_catch);
     osDelay(1);
   }
@@ -243,6 +272,7 @@ void Monitor_Task(void const * argument)
 //				*(&system_monitor.system_error.motor_pitch+i)=0;
 //			}
 //		}
+
 			vTaskDelay(pdMS_TO_TICKS(1));
   }
   /* USER CODE END Monitor_Task */
@@ -261,7 +291,7 @@ void Rx_Task(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-		//Usart_Control(&command,usart1_rx_buff);
+		Usart_Control(&command,usart1_rx_buff);
 		system_monitor.rate_cnt.freertos_rx++;
 		vTaskDelay(pdMS_TO_TICKS(1));
   }

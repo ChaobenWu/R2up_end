@@ -132,7 +132,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
         {
 
 					  case 0x310: // 电推杆
-							fb_pitch = (RxMsg_CAN1[0]<<8)|RxMsg_CAN1[1];
+							fb_pitch = (RxMsg_CAN1[1]<<8)|RxMsg_CAN1[0];
 							system_monitor.rate_cnt.motor_pitch++;
 							break;
 					  case 0x20: // 行程开关
@@ -160,7 +160,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 							memcpy(&motor_shot_down.anglev, &RxMsg_CAN1[4], 4);  // 速度
 							Cacul_w(&motor_shot_down);
 							break;
-						case 0x202://下航模
+						case 0x202://上航模
 							if(motor_shot_up.state==1)
 							{		
 								memcpy(&motor_shot_up.diff_angle, &RxMsg_CAN1, 4);  // 位置
@@ -173,6 +173,8 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 							}
 							memcpy(&motor_shot_up.anglev, &RxMsg_CAN1[4], 4);  // 速度
 							Cacul_w(&motor_shot_up);
+							fbv_shot=motor_shot_up.anglev;
+							fb_shot=motor_shot_up.angle;
 							break;
             default:
               break;

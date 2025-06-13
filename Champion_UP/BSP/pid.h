@@ -4,7 +4,6 @@
 #include "types.h"
 #include "stm32f4xx_hal_can.h"
 #include "main.h"
-void PID_Init(ST_PID *pid, float p, float i, float d, float maxErr, float maxI, float maxO);
 void PID_Calc(ST_PID *pstPid);
 void PID_Calc_DualLoop(ST_CASCADE_PID *cascadePid);
 void CalTD(ST_TD *pStTD);

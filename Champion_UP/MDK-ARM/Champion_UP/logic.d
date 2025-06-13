@@ -36,3 +36,4 @@ champion_up\logic.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 champion_up\logic.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
 champion_up\logic.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
 champion_up\logic.o: ..\LOGIC\logic.h
+champion_up\logic.o: ../Core/Inc/main.h

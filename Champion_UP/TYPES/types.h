@@ -174,7 +174,7 @@ typedef struct
     float fpSumE; // 总偏差           
 
     float fpU; // 本次PID运算结果       
-    float fpIMax;
+    float fpSumEMax;
     float fpEMax; // 做积分分离运算时偏差的最大值                                             
     float fpOMax; // 输出限幅
     float fpEMin; //偏差死区
@@ -231,23 +231,37 @@ typedef struct
 typedef struct
 {
 	int init;
-	int receive;
+	int start;
 	int bounce;
 	int lay;
 	int aim;
 	int shot;
-	int home;
 	int flag_aim;
 	int number_aim;
-	int force;
-	int stretch;
 	int air_flag;	
  ST_SHOT command_shot;
 }ST_COMMAND;
 
+/*一阶LESO算法结构体*/
+typedef struct
+{
+  float Beta01;//100
+  float Beta02;//2500
+  float b0;//300
 
+  float Z1;
+  float Z2;
+
+  float h;//积分步长
+  float E;//观测误差 Z1 - Y 
+
+  float U0;
+  float U;
+
+  float fpUMax;
+}ST_LESO_1order;
 //下面这些玩意儿是声明，只能放需要在多个文件中使用的全局变量
-
+extern int state;
 extern uint8_t usart1_rx_buff[100];
 extern uint8_t usart1_tx_buff[18];
 
@@ -265,7 +279,7 @@ extern uint8_t desq_catch;//收球气缸
 
 extern uint16_t fb_pitch;//云台俯仰3508
 extern float fb_shot;//发射3508
-extern float fbv_shot;//发射3508（初始化用
+extern float fbv_shot;//发射（初始化用
 extern float fb_rotate;//发射3508（初始化用
 extern float fbv_bounce_left;//左
 extern float fbv_bounce_right;//右
@@ -288,7 +302,7 @@ extern ST_CASCADE_PID pid_rotate;
 // 单环PID控制器
 extern ST_PID pid_bounce_left;
 extern ST_PID pid_bounce_right;
-
+extern ST_PID pid_shot_mod;
 
 // 系统监控和命令结构
 extern ST_SYSTEM_MONITOR system_monitor;
@@ -298,10 +312,11 @@ extern ST_SHOT shot[10];
 
 extern float distance;
 extern float yaw;
+extern ST_LESO_1order order;
 //下面这些玩意儿是一些通用函数;
 float LimitMax(float fpValue, float fpMin, float fpMax);
 int Sgn(float y);
-
+void LESO_Order1(ST_LESO_1order * leso_1order, float y,float U0);
 
 extern uint16_t DC_motor_fpU;//电推杆反馈位置
 extern uint16_t DC_motor_Des;//电推杆目标位置

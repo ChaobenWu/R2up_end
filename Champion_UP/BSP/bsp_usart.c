@@ -16,15 +16,11 @@ void Usart_Control(ST_COMMAND *my_command,uint8_t rx[])
 		
 		my_command->lay=rx[4];
 		
-		my_command->force=rx[5];
 		
 		my_command->aim=rx[6];
 		
 		my_command->shot=rx[7];
 		
-		my_command->home=rx[8];
-		
-		my_command->stretch=rx[9];
 				
 		my_command->flag_aim=rx[10];
 		

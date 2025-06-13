@@ -29,7 +29,7 @@ float fbv_bounce_right=0;//右
 float distance=0;
 float yaw=0;
 
-
+int state=0;
 //*****************结构体*****************************//
 
 
@@ -47,7 +47,7 @@ ST_MOTOR_H motor_shot_down={.state=1};
 ST_TD td_pitch = 
 { .x1 = 0, .x2 = 0, .x = 0, .r = 1000, .T = 0.001, .h = 0.002};
 ST_TD td_shot = 
-{ .x1 = 0, .x2 = 0, .x = 0, .r = 1000, .T = 0.001, .h = 0.002};
+{ .x1 = 0, .x2 = 0, .x = 0, .r = 4000, .T = 0.001, .h = 0.002};
 ST_TD td_rotate= 
 { .x1 = 0, .x2 = 0, .x = 0, .r = 5000, .T = 0.001, .h = 0.002};
 
@@ -55,13 +55,13 @@ ST_TD td_rotate=
 //pid
 ST_CASCADE_PID pid_shot = {
     .inner = {
-        .fpKp = 300.0f,
-        .fpKi = 0.001f,
+        .fpKp = 170.0f,
+        .fpKi = 0.1f,
         .fpKd = 0.0f,
         .fpDes = 0.0f,
-        .fpIMax = 10000.0f,
-        .fpEMax = 10000.0f,
-        .fpOMax = 16000.0f,
+        .fpSumEMax = 10000.0f,
+        .fpEMax = 100.0f,
+        .fpOMax = 22000.0f,
         .fpEMin = 0.0f,
         .fpFB = 0.0f,
         .fpE = 0.0f,
@@ -74,14 +74,14 @@ ST_CASCADE_PID pid_shot = {
         .fpUKdpre = 0.0f
     },
     .outer = {
-        .fpKp = 4.0f,
-        .fpKi = 0.02f,
+        .fpKp =1.5f,
+        .fpKi = 0.1f,
         .fpKd = 0.0f,
         .fpDes = 0.0f,
-        .fpIMax = 1000.0f,
+        .fpSumEMax = 1000.0f,
         .fpEMax = 30.0f,
-        .fpOMax = 469.0f,
-        .fpEMin = 0.3f,
+        .fpOMax = 180.0f,
+        .fpEMin = 0.8f,
         .fpFB = 0.0f,
         .fpE = 0.0f,
         .fpPreE = 0.0f,
@@ -102,7 +102,7 @@ ST_CASCADE_PID pid_rotate= {
         .fpKi = 0.001f,
         .fpKd = 0.0f,
         .fpDes = 0.0f,
-        .fpIMax = 10000.0f,
+        .fpSumEMax = 10000.0f,
         .fpEMax = 10000.0f,
         .fpOMax = 10000.0f,
         .fpEMin = 0.0f,
@@ -121,7 +121,7 @@ ST_CASCADE_PID pid_rotate= {
         .fpKi = 0.001f,
         .fpKd = 0.0f,
         .fpDes = 0.0f,
-        .fpIMax = 10000.0f,
+        .fpSumEMax = 10000.0f,
         .fpEMax = 10000.0f,
         .fpOMax = 469.0f,
         .fpEMin = 0.0f,
@@ -144,7 +144,7 @@ ST_PID pid_bounce_left = {
         .fpKi = 0.005f,
         .fpKd = 2.0f,
         .fpDes = 0.0f,
-        .fpIMax = 1000.0f,
+        .fpSumEMax = 1000.0f,
         .fpEMax = 10.0f,
         .fpOMax = 15000.0f,
         .fpEMin = 0.0f,
@@ -164,7 +164,7 @@ ST_PID pid_bounce_right = {
         .fpKi = 0.005f,
         .fpKd = 2.0f,
         .fpDes = 0.0f,
-        .fpIMax = 1000.0f,
+        .fpSumEMax = 1000.0f,
         .fpEMax = 10.0f,
         .fpOMax = 15000.0f,
         .fpEMin = 0.0f,
@@ -182,13 +182,13 @@ ST_PID pid_bounce_right = {
 
 		
 ST_PID pid_shot_mod = {
-        .fpKp = 200.0f,
-        .fpKi = 0.0005f,
+        .fpKp = 80.0f,
+        .fpKi = 0.8f,
         .fpKd = 2.0f,
         .fpDes = 0.0f,
-        .fpIMax = 1000.0f,
-        .fpEMax = 100.0f,
-        .fpOMax = 5000.0f,
+        .fpSumEMax = 2000.0f,
+        .fpEMax = 1000.0f,
+        .fpOMax = 22000.0f,
         .fpEMin = 0.0f,
         .fpFB = 0.0f,
         .fpE = 0.0f,
@@ -219,6 +219,16 @@ ST_SHOT shot[10]={
 {.pitch=1500,.dapao=3000},//7
 {.pitch=1500,.dapao=3000},//8
 {.pitch=1500,.dapao=3000},//9
+};
+
+
+ST_LESO_1order order=
+{
+  .Beta01=60,//100
+  .Beta02=900,//2500
+  .b0=600,//300
+	.fpUMax=22000,
+	.h=0.001
 };
 /*******************************************************************************************
 函数名称：LimitMax()
@@ -274,4 +284,26 @@ int Sgn(float y)
     {
         return 0;
     }
+}
+
+
+
+/*-------------------------------------------------------------------------------------------------
+函数功能：一二阶LESO算法，通过状态观测器来观测扰动，在输出电流量中补偿掉
+-------------------------------------------------------------------------------------------------*/
+void LESO_Order1(ST_LESO_1order * leso_1order, float y,float U0)
+{
+
+  leso_1order->U0 = U0;
+
+  leso_1order->E = y - leso_1order->Z1;
+	
+	leso_1order->Z1 += leso_1order->h*(leso_1order->b0 * leso_1order->U0+ leso_1order->Z2+leso_1order->Beta01 * leso_1order->E);
+
+	leso_1order->Z2 += leso_1order->h*leso_1order->Beta02 * leso_1order->E;
+	
+	leso_1order->U = leso_1order->U0 - leso_1order->Z2/leso_1order->b0;
+
+	if(leso_1order->U>=leso_1order->fpUMax) leso_1order->U = leso_1order->fpUMax;
+	if(leso_1order->U<=-leso_1order->fpUMax) leso_1order->U = -leso_1order->fpUMax;
 }
