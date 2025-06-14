@@ -296,9 +296,9 @@ extern ST_TD td_pitch;
 extern ST_TD td_shot;
 extern ST_TD td_rotate;
 // 级联PID控制器
-extern ST_CASCADE_PID pid_pitch;
 extern ST_CASCADE_PID pid_shot;
 extern ST_CASCADE_PID pid_rotate;
+extern ST_PID pid_pitch;
 // 单环PID控制器
 extern ST_PID pid_bounce_left;
 extern ST_PID pid_bounce_right;
@@ -312,7 +312,9 @@ extern ST_SHOT shot[10];
 
 extern float distance;
 extern float yaw;
-extern ST_LESO_1order order;
+extern ST_LESO_1order order1;
+extern ST_LESO_1order order2;
+extern ST_LESO_1order order3;
 //下面这些玩意儿是一些通用函数;
 float LimitMax(float fpValue, float fpMin, float fpMax);
 int Sgn(float y);

@@ -1,6 +1,7 @@
 #include "types.h"
 #include "bsp_usart.h"
-
+#include "pid.h"
+#include "tim.h"
 void Usart_Control(ST_COMMAND *my_command,uint8_t rx[])
 {
 	float pitch=0;
@@ -54,22 +55,30 @@ void Usart_Control(ST_COMMAND *my_command,uint8_t rx[])
 }	
 
 
-void DC_Montor(uint16_t des,uint16_t fb)
+void DC_Montor(uint16_t des,uint16_t fb,ST_PID *pid)//4900-9500
 {
-	if(des>fb)//DOWN
+	float fpdes=0;
+	int count1=0;
+	int count2=0;
+	if(des>9500)
 	{
-		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_6,GPIO_PIN_SET);
-		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_10,GPIO_PIN_RESET);
+		fpdes=9500;
 	}
-	else if(fb>des)//UP
+	else if(des<4900)
 	{
-		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_6,GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_10,GPIO_PIN_SET);
+		fpdes=4900;
 	}
 	else
 	{
-		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_6,GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_10,GPIO_PIN_RESET);
+		fpdes=(float)des;
 	}
+	pid->fpDes=fpdes;
+	pid->fpFB=fb;
+	PID_Calc(pid);
+	count1=(int)round(pid->fpU)+2000;
+	count2=-(int)round(pid->fpU)+2000;
+	__HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,count1);	
+	__HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_3,count2);
+
 }
 

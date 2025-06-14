@@ -4,6 +4,6 @@
 #include "types.h"
 
 void Usart_Control(ST_COMMAND *my_command,uint8_t rx[]);
-void DC_Montor(uint16_t des,uint16_t fb);
+void DC_Montor(uint16_t des,uint16_t fb,ST_PID *pid);//4900-9500
 
 #endif //__BSP_USART_H__

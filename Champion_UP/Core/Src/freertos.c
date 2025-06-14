@@ -119,27 +119,27 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 256);
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of logic */
-  osThreadDef(logic, Logic_Task, osPriorityIdle, 0, 256);
+  osThreadDef(logic, Logic_Task, osPriorityIdle, 0, 128);
   logicHandle = osThreadCreate(osThread(logic), NULL);
 
   /* definition and creation of control */
-  osThreadDef(control, Control_Task, osPriorityIdle, 0, 256);
+  osThreadDef(control, Control_Task, osPriorityIdle, 0, 128);
   controlHandle = osThreadCreate(osThread(control), NULL);
 
   /* definition and creation of monitor */
-  osThreadDef(monitor, Monitor_Task, osPriorityIdle, 0, 256);
+  osThreadDef(monitor, Monitor_Task, osPriorityIdle, 0, 128);
   monitorHandle = osThreadCreate(osThread(monitor), NULL);
 
   /* definition and creation of usartRX */
-  osThreadDef(usartRX, Rx_Task, osPriorityIdle, 0, 256);
+  osThreadDef(usartRX, Rx_Task, osPriorityIdle, 0, 128);
   usartRXHandle = osThreadCreate(osThread(usartRX), NULL);
 
   /* definition and creation of usartTX */
-  osThreadDef(usartTX, Tx_Task, osPriorityIdle, 0, 256);
+  osThreadDef(usartTX, Tx_Task, osPriorityIdle, 0, 128);
   usartTXHandle = osThreadCreate(osThread(usartTX), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -180,7 +180,6 @@ void Logic_Task(void const * argument)
   for(;;)
   {
 		Logic(command);
-		//Belt_Shot();
 		system_monitor.rate_cnt.freertos_logic++;
 		vTaskDelay(pdMS_TO_TICKS(1));
   }
@@ -221,14 +220,15 @@ void Control_Task(void const * argument)
 //		{
 //			f_current=(fbv_shot)*40;
 //		}
-		
+		td_shot.aim=des_shot;
+		CalTD(&td_shot);	
 		if(state==0)
 		{
 		pid_shot_mod.fpDes=desv_shot;
 		pid_shot_mod.fpFB=motor_shot_up.anglev;
 		PID_Calc(&pid_shot_mod);
-		LESO_Order1(&order, motor_shot_up.anglev,pid_shot_mod.fpU);		
-		CAN_SendCurrent(&hcan1,0x200,order.U,order.U,0,0);		
+		LESO_Order1(&order1, motor_shot_up.anglev,pid_shot_mod.fpU);		
+		CAN_SendCurrent(&hcan1,0x200,order1.U,order1.U,0,0);		
 		}
 		if(state==1)
 		{
@@ -238,11 +238,18 @@ void Control_Task(void const * argument)
 			PID_Calc_DualLoop(&pid_shot);
 		CAN_SendCurrent(&hcan1,0x200,pid_shot.output,pid_shot.output,0,0);				
 		}
-
+		if(state==2)
+		{
+			pid_shot.outer.fpDes=td_shot.x1;
+			pid_shot.outer.fpFB=motor_shot_up.angle;
+			pid_shot.inner.fpFB=motor_shot_up.anglev;
+			PID_Calc_DualLoop(&pid_shot);
+		CAN_SendCurrent(&hcan1,0x200,pid_shot.output,pid_shot.output,0,0);
+		}
 		CAN_SendCurrent(&hcan2,0x200,pid_rotate.output,pid_bounce_right.fpU,pid_bounce_left.fpU,0);
-	//	CAN_SendCurrent(&hcan1,0x200,pid_shot_mod.fpU+f_current,pid_shot_mod.fpU+f_current,0,0);
+		//CAN_SendCurrent(&hcan1,0x200,pid_shot_mod.fpU+f_current,pid_shot_mod.fpU+f_current,0,0);
 
-		SendSwitchValue(desq_catch);
+		SendSwitchValue(desq_catch);//气缸
     osDelay(1);
   }
   /* USER CODE END Control_Task */
@@ -311,15 +318,29 @@ void Tx_Task(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-//	usart1_tx_buff[0]=0x66;
-//	usart1_tx_buff[1]=desq_catch;
-//		for (int i = 0; i < 8; i++) {
-//        usart1_tx_buff[2] |= (*(&system_monitor.system_error.motor_pitch+i) << (7 - i));  // ??? 8 ????��
-//    }
-//    for (int i = 8; i < 16; i++) {
-//        usart1_tx_buff[3] |= (*(&system_monitor.system_error.motor_pitch+i) << (15 - i));  // ???? 8 ????��
-//    }
-//		HAL_UART_Transmit_IT(&huart1,usart1_tx_buff,sizeof(usart1_tx_buff));
+		usart1_tx_buff[0]=0x66;
+		usart1_tx_buff[1]=desq_catch;
+		for (int i = 0; i < 8; i++) {
+        usart1_tx_buff[2] |= (*(&system_monitor.system_error.motor_pitch+i) << (7 - i));  // ??? 8 ????��
+    }
+    for (int i = 8; i < 16; i++) {
+        usart1_tx_buff[3] |= (*(&system_monitor.system_error.motor_pitch+i) << (15 - i));  // ???? 8 ????��
+    }
+		
+		usart1_tx_buff[4]=0;
+		usart1_tx_buff[5]=0;
+		usart1_tx_buff[6]=0;
+		usart1_tx_buff[7]=0;
+		usart1_tx_buff[8]=0;
+		usart1_tx_buff[9]=0;
+		usart1_tx_buff[4]= flag_init;
+		usart1_tx_buff[5]=flag_start;
+		usart1_tx_buff[6]= flag_bounce;   
+		usart1_tx_buff[7]= flag_lay;          
+		usart1_tx_buff[8]= flag_aim;    
+		usart1_tx_buff[9]= flag_shot;  
+		HAL_UART_Transmit_IT(&huart1,usart1_tx_buff,sizeof(usart1_tx_buff));
+		DC_Montor(des_pitch,fb_pitch,&pid_pitch);
 		system_monitor.rate_cnt.freertos_tx++;
 		vTaskDelay(pdMS_TO_TICKS(1));
   }

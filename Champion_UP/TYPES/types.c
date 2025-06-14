@@ -5,7 +5,7 @@
 uint8_t usart1_rx_buff[100]={0};
 uint8_t usart1_tx_buff[18]={0};
 
-uint16_t des_pitch=0;//云台俯仰3508
+uint16_t des_pitch=7500;//云台俯仰3508
 float des_shot=0;//发射3508
 float desv_shot=0;//调试模式发射
 float des_rotate=0;//前收球3508
@@ -29,7 +29,7 @@ float fbv_bounce_right=0;//右
 float distance=0;
 float yaw=0;
 
-int state=0;
+int state=1;
 //*****************结构体*****************************//
 
 
@@ -47,7 +47,7 @@ ST_MOTOR_H motor_shot_down={.state=1};
 ST_TD td_pitch = 
 { .x1 = 0, .x2 = 0, .x = 0, .r = 1000, .T = 0.001, .h = 0.002};
 ST_TD td_shot = 
-{ .x1 = 0, .x2 = 0, .x = 0, .r = 4000, .T = 0.001, .h = 0.002};
+{ .x1 = 0, .x2 = 0, .x = 0, .r = 10000, .T = 0.001, .h = 0.002};
 ST_TD td_rotate= 
 { .x1 = 0, .x2 = 0, .x = 0, .r = 5000, .T = 0.001, .h = 0.002};
 
@@ -74,8 +74,8 @@ ST_CASCADE_PID pid_shot = {
         .fpUKdpre = 0.0f
     },
     .outer = {
-        .fpKp =1.5f,
-        .fpKi = 0.1f,
+        .fpKp =1.0f,
+        .fpKi = 0.004f,
         .fpKd = 0.0f,
         .fpDes = 0.0f,
         .fpSumEMax = 1000.0f,
@@ -118,7 +118,7 @@ ST_CASCADE_PID pid_rotate= {
     },
     .outer = {
         .fpKp = 4.0f,
-        .fpKi = 0.001f,
+        .fpKi = 0.01f,
         .fpKd = 0.0f,
         .fpDes = 0.0f,
         .fpSumEMax = 10000.0f,
@@ -146,7 +146,7 @@ ST_PID pid_bounce_left = {
         .fpDes = 0.0f,
         .fpSumEMax = 1000.0f,
         .fpEMax = 10.0f,
-        .fpOMax = 15000.0f,
+        .fpOMax = 12000.0f,
         .fpEMin = 0.0f,
         .fpFB = 0.0f,
         .fpE = 0.0f,
@@ -166,7 +166,7 @@ ST_PID pid_bounce_right = {
         .fpDes = 0.0f,
         .fpSumEMax = 1000.0f,
         .fpEMax = 10.0f,
-        .fpOMax = 15000.0f,
+        .fpOMax = 14000.0f,
         .fpEMin = 0.0f,
         .fpFB = 0.0f,
         .fpE = 0.0f,
@@ -201,7 +201,25 @@ ST_PID pid_shot_mod = {
         .fpUKdpre = 0.0f
     };
 		
-
+ST_PID pid_pitch = {
+        .fpKp = 75.0f,
+        .fpKi = 0.025f,
+        .fpKd = 2.0f,
+        .fpDes = 0.0f,
+        .fpSumEMax = 2000.0f,
+        .fpEMax = 1000.0f,
+        .fpOMax = 2000.0f,
+        .fpEMin = 6.0f,
+        .fpFB = 0.0f,
+        .fpE = 0.0f,
+        .fpPreE = 0.0f,
+        .fpSumE = 0.0f,
+        .fpU = 0.0f,
+        .fpUKp = 0.0f,
+        .fpUKi = 0.0f,
+        .fpUKd = 0.0f,
+        .fpUKdpre = 0.0f
+    };
 ST_SYSTEM_MONITOR system_monitor={0};
 
 ST_COMMAND command;
@@ -222,7 +240,25 @@ ST_SHOT shot[10]={
 };
 
 
-ST_LESO_1order order=
+ST_LESO_1order order1=
+{
+  .Beta01=60,//100
+  .Beta02=900,//2500
+  .b0=600,//300
+	.fpUMax=22000,
+	.h=0.001
+};
+
+ST_LESO_1order order2=
+{
+  .Beta01=60,//100
+  .Beta02=900,//2500
+  .b0=600,//300
+	.fpUMax=22000,
+	.h=0.001
+};
+
+ST_LESO_1order order3=
 {
   .Beta01=60,//100
   .Beta02=900,//2500

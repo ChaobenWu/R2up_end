@@ -132,7 +132,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
         {
 
 					  case 0x310: // 电推杆
-							fb_pitch = (RxMsg_CAN1[1]<<8)|RxMsg_CAN1[0];
+							fb_pitch = ((RxMsg_CAN1[1]<<8)&0xFF00)|(RxMsg_CAN1[0]&0x00FF);
 							system_monitor.rate_cnt.motor_pitch++;
 							break;
 					  case 0x20: // 行程开关

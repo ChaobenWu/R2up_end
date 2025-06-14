@@ -36,3 +36,6 @@ champion_up\bsp_usart.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 champion_up\bsp_usart.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
 champion_up\bsp_usart.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
 champion_up\bsp_usart.o: ..\BSP\bsp_usart.h
+champion_up\bsp_usart.o: ..\BSP\pid.h
+champion_up\bsp_usart.o: ../Core/Inc/main.h
+champion_up\bsp_usart.o: ../Core/Inc/tim.h
