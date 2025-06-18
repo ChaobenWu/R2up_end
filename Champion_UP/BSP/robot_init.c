@@ -6,7 +6,7 @@
 #include "tim.h"
 #include "logic.h"
 
-void robot_init()
+void Robot_Init()
 {   
 	//	HAL_UARTEx_ReceiveToIdle_DMA(&huart1,usart1_rx_buff,100);	
 		HAL_UART_Receive_DMA(&huart1,usart1_rx_buff,30); 

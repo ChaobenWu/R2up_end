@@ -57,3 +57,4 @@ champion_up\freertos.o: ../Core/Inc/can.h
 champion_up\freertos.o: ../BSP/pid.h
 champion_up\freertos.o: ../Core/Inc/tim.h
 champion_up\freertos.o: ../LOGIC/logic.h
+champion_up\freertos.o: ../BSP/system_monitor.h

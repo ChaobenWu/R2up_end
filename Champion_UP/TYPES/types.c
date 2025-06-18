@@ -19,7 +19,7 @@ float desv_bounce_right=0;//右
 uint8_t desq_catch=1;//收球气缸
 
 
-uint16_t fb_pitch=0;//云台俯仰3508
+int fb_pitch=0;//云台俯仰3508
 float fb_shot=0;//发射3508
 float fbv_shot=0;//发射3508（初始化用
 float fb_rotate=0;//发射3508
@@ -29,7 +29,8 @@ float fbv_bounce_right=0;//右
 float distance=0;
 float yaw=0;
 
-int state=1;
+int state_shot=1;
+int state_pitch=0;
 //*****************结构体*****************************//
 
 
@@ -55,8 +56,8 @@ ST_TD td_rotate=
 //pid
 ST_CASCADE_PID pid_shot = {
     .inner = {
-        .fpKp = 170.0f,
-        .fpKi = 0.1f,
+        .fpKp = 150.0f,
+        .fpKi = 0.07f,
         .fpKd = 0.0f,
         .fpDes = 0.0f,
         .fpSumEMax = 10000.0f,
@@ -182,11 +183,11 @@ ST_PID pid_bounce_right = {
 
 		
 ST_PID pid_shot_mod = {
-        .fpKp = 80.0f,
-        .fpKi = 0.8f,
+        .fpKp = 180.0f,
+        .fpKi = 3.6f,
         .fpKd = 2.0f,
         .fpDes = 0.0f,
-        .fpSumEMax = 2000.0f,
+        .fpSumEMax = 1000.0f,
         .fpEMax = 1000.0f,
         .fpOMax = 22000.0f,
         .fpEMin = 0.0f,
@@ -202,12 +203,12 @@ ST_PID pid_shot_mod = {
     };
 		
 ST_PID pid_pitch = {
-        .fpKp = 75.0f,
-        .fpKi = 0.025f,
+        .fpKp = 95.0f,
+        .fpKi = 0.03f,
         .fpKd = 2.0f,
         .fpDes = 0.0f,
-        .fpSumEMax = 2000.0f,
-        .fpEMax = 1000.0f,
+        .fpSumEMax = 1000.0f,
+        .fpEMax = 50.0f,
         .fpOMax = 2000.0f,
         .fpEMin = 6.0f,
         .fpFB = 0.0f,
@@ -222,8 +223,7 @@ ST_PID pid_pitch = {
     };
 ST_SYSTEM_MONITOR system_monitor={0};
 
-ST_COMMAND command;
-
+ST_COMMAND command0={0};
 
 //备用，当垃圾的时候使用
 ST_SHOT shot[10]={

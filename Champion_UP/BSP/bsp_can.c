@@ -138,11 +138,11 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 					  case 0x20: // 行程开关
 							if((RxMsg_CAN1[1] & 0x08) == 0)
 							{
-								command.air_flag=0;
+								command0.air_flag=0;
 							}
 							if((RxMsg_CAN1[1] & 0x08) == 0x08)
 							{
-								command.air_flag=1;
+								command0.air_flag=1;
 							}
 							system_monitor.rate_cnt.air_receive++;
 							break;			
@@ -159,6 +159,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 							}
 							memcpy(&motor_shot_down.anglev, &RxMsg_CAN1[4], 4);  // 速度
 							Cacul_w(&motor_shot_down);
+							system_monitor.rate_cnt.motor_shot_down++;
 							break;
 						case 0x202://上航模
 							if(motor_shot_up.state==1)
@@ -175,6 +176,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 							Cacul_w(&motor_shot_up);
 							fbv_shot=motor_shot_up.anglev;
 							fb_shot=motor_shot_up.angle;
+							system_monitor.rate_cnt.motor_shot_up++;
 							break;
             default:
               break;

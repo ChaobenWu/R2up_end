@@ -44,7 +44,7 @@ void Logic(const ST_COMMAND my_command);
 void Init_Task(void);//≥ı ºªØ
 void Start_Task(void);
 void Receive_Task(void);
-void Bounce_Task(void);
+void Bounce_Task(const ST_COMMAND my_command);
 void 	Lay_Task(void);
 void Aim_Task(const ST_COMMAND my_command);
 void Belt_Shot(const ST_COMMAND my_command);

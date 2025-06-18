@@ -33,11 +33,12 @@
 #include "pid.h"
 #include "tim.h"
 #include "logic.h"
+#include "system_monitor.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-float f_current=0;
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -179,7 +180,7 @@ void Logic_Task(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-		Logic(command);
+		Logic(command0);
 		system_monitor.rate_cnt.freertos_logic++;
 		vTaskDelay(pdMS_TO_TICKS(1));
   }
@@ -212,45 +213,37 @@ void Control_Task(void const * argument)
 		pid_rotate.inner.fpFB=motor_rotate.anglev;
 		PID_Calc_DualLoop(&pid_rotate);		
 		
-//		if(fabs(fbv_shot)>50)
-//		{
-//			f_current=Sgn(fbv_shot)*2000;
-//		}
-//		else
-//		{
-//			f_current=(fbv_shot)*40;
-//		}
 		td_shot.aim=des_shot;
 		CalTD(&td_shot);	
-		if(state==0)
-		{
 		pid_shot_mod.fpDes=desv_shot;
 		pid_shot_mod.fpFB=motor_shot_up.anglev;
 		PID_Calc(&pid_shot_mod);
-		LESO_Order1(&order1, motor_shot_up.anglev,pid_shot_mod.fpU);		
-		CAN_SendCurrent(&hcan1,0x200,order1.U,order1.U,0,0);		
-		}
-		if(state==1)
+		switch(state_shot)
 		{
-			pid_shot.outer.fpDes=des_shot;
-			pid_shot.outer.fpFB=motor_shot_up.angle;
-			pid_shot.inner.fpFB=motor_shot_up.anglev;
-			PID_Calc_DualLoop(&pid_shot);
-		CAN_SendCurrent(&hcan1,0x200,pid_shot.output,pid_shot.output,0,0);				
-		}
-		if(state==2)
-		{
-			pid_shot.outer.fpDes=td_shot.x1;
-			pid_shot.outer.fpFB=motor_shot_up.angle;
-			pid_shot.inner.fpFB=motor_shot_up.anglev;
-			PID_Calc_DualLoop(&pid_shot);
-		CAN_SendCurrent(&hcan1,0x200,pid_shot.output,pid_shot.output,0,0);
+			case 0:	
+				CAN_SendCurrent(&hcan1,0x200,pid_shot_mod.fpU,pid_shot_mod.fpU,0,0);		
+				break;
+			case 1:
+				pid_shot.outer.fpDes=des_shot;
+				pid_shot.outer.fpFB=motor_shot_up.angle;
+				pid_shot.inner.fpFB=motor_shot_up.anglev;
+				PID_Calc_DualLoop(&pid_shot);
+				CAN_SendCurrent(&hcan1,0x200,pid_shot.output,pid_shot.output,0,0);				
+				break;
+			case 2:
+				pid_shot.outer.fpDes=td_shot.x1;
+				pid_shot.outer.fpFB=motor_shot_up.angle;
+				pid_shot.inner.fpFB=motor_shot_up.anglev;
+				PID_Calc_DualLoop(&pid_shot);
+				CAN_SendCurrent(&hcan1,0x200,pid_shot.output,pid_shot.output,0,0);
+				break;
+			default:
+				break;
 		}
 		CAN_SendCurrent(&hcan2,0x200,pid_rotate.output,pid_bounce_right.fpU,pid_bounce_left.fpU,0);
-		//CAN_SendCurrent(&hcan1,0x200,pid_shot_mod.fpU+f_current,pid_shot_mod.fpU+f_current,0,0);
-
 		SendSwitchValue(desq_catch);//气缸
-    osDelay(1);
+		system_monitor.rate_cnt.freertos_control++;
+		vTaskDelay(pdMS_TO_TICKS(1));
   }
   /* USER CODE END Control_Task */
 }
@@ -268,19 +261,8 @@ void Monitor_Task(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-//		for (int i = 0; i <16 ; i++)
-//		{
-//       uint16_t fps = *(&system_monitor.rate_fps.motor_pitch+i);
-//			if (fps < 950 || fps > 1050) 
-//			{
-//				*(&system_monitor.system_error.motor_pitch+i)=1;
-//			}
-//			else{
-//				*(&system_monitor.system_error.motor_pitch+i)=0;
-//			}
-//		}
-
-			vTaskDelay(pdMS_TO_TICKS(1));
+		System_Monitor(&system_monitor);
+		vTaskDelay(pdMS_TO_TICKS(1));
   }
   /* USER CODE END Monitor_Task */
 }
@@ -298,7 +280,7 @@ void Rx_Task(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-		Usart_Control(&command,usart1_rx_buff);
+		Usart_Control(&command0,usart1_rx_buff);
 		system_monitor.rate_cnt.freertos_rx++;
 		vTaskDelay(pdMS_TO_TICKS(1));
   }
@@ -319,14 +301,14 @@ void Tx_Task(void const * argument)
   for(;;)
   {
 		usart1_tx_buff[0]=0x66;
-		usart1_tx_buff[1]=desq_catch;
+		usart1_tx_buff[2]=0;
+		usart1_tx_buff[3]=0;		
 		for (int i = 0; i < 8; i++) {
-        usart1_tx_buff[2] |= (*(&system_monitor.system_error.motor_pitch+i) << (7 - i));  // ??? 8 ????��
+        usart1_tx_buff[2] |= (*(&system_monitor.system_error.motor_pitch+i) << (7 - i)); 
     }
-    for (int i = 8; i < 16; i++) {
-        usart1_tx_buff[3] |= (*(&system_monitor.system_error.motor_pitch+i) << (15 - i));  // ???? 8 ????��
-    }
-		
+    for (int i = 8; i < 12; i++) {
+        usart1_tx_buff[3] |= (*(&system_monitor.system_error.motor_pitch+i) << (15 - i));  
+    }		
 		usart1_tx_buff[4]=0;
 		usart1_tx_buff[5]=0;
 		usart1_tx_buff[6]=0;
@@ -339,7 +321,7 @@ void Tx_Task(void const * argument)
 		usart1_tx_buff[7]= flag_lay;          
 		usart1_tx_buff[8]= flag_aim;    
 		usart1_tx_buff[9]= flag_shot;  
-		HAL_UART_Transmit_IT(&huart1,usart1_tx_buff,sizeof(usart1_tx_buff));
+		HAL_UART_Transmit(&huart1,usart1_tx_buff,sizeof(usart1_tx_buff),1);
 		DC_Montor(des_pitch,fb_pitch,&pid_pitch);
 		system_monitor.rate_cnt.freertos_tx++;
 		vTaskDelay(pdMS_TO_TICKS(1));

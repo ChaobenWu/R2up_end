@@ -11,47 +11,41 @@ void Usart_Control(ST_COMMAND *my_command,uint8_t rx[])
 		
 		my_command->init=rx[1];
 		 
-	//	my_command->receive=rx[2];
+		my_command->start=rx[2];
 		
 		my_command->bounce=rx[3];
 		
-		my_command->lay=rx[4];
+		my_command->lay=rx[4];	
 		
+		my_command->aim=rx[5];
 		
-		my_command->aim=rx[6];
-		
-		my_command->shot=rx[7];
-		
+		my_command->shot=rx[6];
 				
-		my_command->flag_aim=rx[10];
+		my_command->flag_aim=rx[7];
 		
-		my_command->number_aim=rx[11];
+		my_command->number_aim=rx[8];
 		
-		memcpy(&pitch,&rx[12],4);
+		memcpy(&pitch,&rx[9],4);
 		
-		memcpy(&dapao,&rx[16],4);
+		memcpy(&dapao,&rx[13],4);
 		
 //		memcpy(&yaw,&rx[20],4);
 //		
 //		memcpy(&distance,&rx[24],4);		
 	
-	//	my_command->air_flag=rx[2];	
 		
-		if(my_command->flag_aim==1)
-		{
-			my_command->command_shot.pitch=pitch;
-			my_command->command_shot.dapao=dapao;		
-		}
-		if(my_command->flag_aim==2)
+//		if(my_command->flag_aim==1)
+//		{
+//			my_command->command_shot.pitch=pitch;
+//			my_command->command_shot.dapao=dapao;		
+//		}
+//		if(my_command->flag_aim==2)
+//		
+//		{
+//			my_command->command_shot.pitch=shot[my_command->number_aim].pitch;
+//			my_command->command_shot.dapao=shot[my_command->number_aim].dapao;		
+//		}
 		
-		{
-			my_command->command_shot.pitch=shot[my_command->number_aim].pitch;
-			my_command->command_shot.dapao=shot[my_command->number_aim].dapao;		
-		}
-		
-		//оч╥Ы
-		LimitMax(my_command->command_shot.pitch, 0, 6000);
-		LimitMax(my_command->command_shot.dapao, 0, 18000);
 }	
 
 
@@ -77,8 +71,15 @@ void DC_Montor(uint16_t des,uint16_t fb,ST_PID *pid)//4900-9500
 	PID_Calc(pid);
 	count1=(int)round(pid->fpU)+2000;
 	count2=-(int)round(pid->fpU)+2000;
-	__HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,count1);	
-	__HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_3,count2);
-
+	if(state_pitch==0)
+	{
+	__HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,count2);	
+	__HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_3,count1);
+	}
+	if(state_pitch==1)
+	{
+	__HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,2000);	
+	__HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_3,2000);
+	}
 }
 

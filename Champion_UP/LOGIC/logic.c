@@ -1,6 +1,7 @@
 #include "types.h"
 #include "logic.h"
-#include "main.h"
+#include <stdlib.h>
+#include <math.h>
 
 int8_t step_init=0;
 int8_t step_start=0;
@@ -82,7 +83,7 @@ void Logic(const ST_COMMAND my_command)
 			}
 			if(flag_bounce)
 			{
-				Bounce_Task();
+				Bounce_Task(my_command);
 			}
 		//放球任务
 			if(my_command.lay)
@@ -128,6 +129,7 @@ void Init_Task(void)//初始化
 	switch (step_init)
 	{
 		case 0://
+			state_pitch=0;
 			desq_catch=CATCH_CYLINDER_CATCH;
 			des_shot=SHOT_INIT;
 			des_pitch=PITCH_INIT;
@@ -157,6 +159,7 @@ void Start_Task(void)//初始化
 	switch (step_start)
 	{
 		case 0://
+			state_pitch=0;
 			des_rotate=ROTATE_BOUNCE;
 			desq_catch=CATCH_CYLINDER_CATCH;
 			if(fabs(fb_rotate-ROTATE_BOUNCE)<5)
@@ -191,12 +194,13 @@ float t5=70;//夹球延时
 float limit_a=100;//拍球
 float maxA=180;
 
-void Bounce_Task(void)
+void Bounce_Task(const ST_COMMAND my_command)
 {
 		switch (step_bounce)
 		{
 			case 0://确保拍球位置和发射位置
-				state=2;
+				state_shot=2;
+				state_pitch=0;
 				des_rotate=ROTATE_BOUNCE;
 				desq_catch=CATCH_CYLINDER_CATCH;
 				des_shot=SHOT_LAY;
@@ -237,13 +241,13 @@ void Bounce_Task(void)
 				}
 				break;
 			case 4://检测向上碰撞
-				if(command.air_flag==0)
+				if(my_command.air_flag==0)
 				{
 					step_bounce=5;	
 				}
 				break;		
 			case 5://检测向上碰撞
-				if(command.air_flag==1)
+				if(my_command.air_flag==1)
 				{
 					step_bounce=6;	
 				}
@@ -270,7 +274,8 @@ void Lay_Task(void)
 	switch(step_lay)
 	{
 		case 0://把球推进去，然后把云台抬起来
-			state=2;
+			state_pitch=0;
+			state_shot=2;
 			desq_catch=CATCH_CYLINDER_CATCH;
 			des_shot=SHOT_LAY;
 			des_pitch=PITCH_LAY;
@@ -335,7 +340,7 @@ void Lay_Task(void)
 			if(fabs(fb_rotate-ROTATE_BOUNCE)<5)
 			{
 				flag_lay=0;
-				state=0;
+				state_shot=0;
 			}	
 			break;
 	}		
@@ -348,9 +353,13 @@ void 	Aim_Task(const ST_COMMAND my_command)
 	switch(step_aim)
 	{
 		case 0:
+			state_shot=2;
+			state_pitch=0;
+			des_shot=SHOT_START;
 			des_pitch=my_command.command_shot.pitch;
 			des_rotate=ROTATE_BOUNCE;
-			if(fabs(fb_pitch-my_command.command_shot.pitch)<1&&fabs(fb_rotate-ROTATE_BOUNCE)<1)
+			
+			if(fabs(fb_pitch-my_command.command_shot.pitch)<5&&fabs(fb_rotate-ROTATE_BOUNCE)<1&&fabs(fb_shot-SHOT_START)<5)
 			{
 				step_aim=1;
 			}
@@ -371,51 +380,64 @@ void Belt_Shot(const ST_COMMAND my_command)
 {
 	switch(step_shot)
 	{
-	case 0:  
-			state=0;
-			time6_0++;
+	case 0:
+		state_shot=2;
+		state_pitch=0;
+		des_shot=SHOT_START;
+		des_pitch=my_command.command_shot.pitch;
+		des_rotate=ROTATE_BOUNCE;		
+		if(fabs(fb_pitch-my_command.command_shot.pitch)<10&&fabs(fb_rotate-ROTATE_BOUNCE)<1&&fabs(fb_shot-SHOT_START)<8)
+			{
+				step_shot=1;
+			}	
+		break;
+	case 1:  
+		state_shot=0;
+		state_pitch=1;
+		time6_0++;
 		if(time6_0>t_up)
 		{
 			desv_shot=0;
-			step_shot=1;
+			step_shot=2;
 			time6_0=0;
 		}
 		break;
-	case 1:
+	case 2:
 		desv_shot=-my_command.command_shot.dapao;
-		if(fabs(fb_shot-SHOT_SHOT)<20)
+		if(SHOT_SHOT-fb_shot>20)
 		{
-			step_shot=2;
+			step_shot=3;
 		}
 		break;
-	case 2:
+	case 3:
 		time6_1++;
 		desv_shot=100;
 		if(time6_1>t_uniform)
 		{
-			step_shot=3;
+			step_shot=4;
 			time6_1=0;
 		}
 		break;
-	case 3:
+	case 4:
 		desv_shot=0;
 		time6_2++;	
 		if(time6_2>t_down)
 		{
-			step_shot=4;
+			step_shot=5;
 			time6_2=0;
 		}
 		break;
-	case 4:
-		state=1;
-		des_shot=SHOT_INIT;
-		if(fabs(fb_shot-SHOT_INIT)<1)
+	case 5:
+		state_shot=1;
+		des_shot=SHOT_START;
+		if(fabs(fb_shot-SHOT_START)<1)
 		{
-			step_shot=5;
+			step_shot=6;
 			desv_shot=0;
 		}
 		break;
-	case 5:
+	case 6:
+		state_pitch=0;
 		flag_shot=0;
 		break;
 	}

@@ -261,7 +261,8 @@ typedef struct
   float fpUMax;
 }ST_LESO_1order;
 //下面这些玩意儿是声明，只能放需要在多个文件中使用的全局变量
-extern int state;
+extern int state_shot;
+extern int state_pitch;
 extern uint8_t usart1_rx_buff[100];
 extern uint8_t usart1_tx_buff[18];
 
@@ -277,7 +278,7 @@ extern float desv_bounce_right;//右
 extern uint8_t desq_catch;//收球气缸
 
 
-extern uint16_t fb_pitch;//云台俯仰3508
+extern int fb_pitch;//云台俯仰3508
 extern float fb_shot;//发射3508
 extern float fbv_shot;//发射（初始化用
 extern float fb_rotate;//发射3508（初始化用
@@ -306,7 +307,7 @@ extern ST_PID pid_shot_mod;
 
 // 系统监控和命令结构
 extern ST_SYSTEM_MONITOR system_monitor;
-extern ST_COMMAND command;
+extern ST_COMMAND command0;
 extern ST_SHOT shot[10];
 
 
