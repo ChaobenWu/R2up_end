@@ -34,11 +34,12 @@
 #include "tim.h"
 #include "logic.h"
 #include "system_monitor.h"
+#include "VOFA.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+int last_state=-1;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -215,27 +216,48 @@ void Control_Task(void const * argument)
 		
 		td_shot.aim=des_shot;
 		CalTD(&td_shot);	
-		pid_shot_mod.fpDes=desv_shot;
-		pid_shot_mod.fpFB=motor_shot_up.anglev;
-		PID_Calc(&pid_shot_mod);
+//		g_stFrictionSMC.fpDes=desv_shot;
+//		g_stFrictionSMC.fpFB=motor_shot_up.anglev;
+//		CalSMC(&g_stFrictionSMC);
+//		CAN_SendCurrent(&hcan1,0x200,g_stFrictionSMC.fpU,g_stFrictionSMC.fpU,0,0);	
 		switch(state_shot)
 		{
 			case 0:	
+			if(last_state!=0)
+			{
+				pid_shot_mod.fpSumE=0;
+			}
+				pid_shot_mod.fpDes=desv_shot;
+				pid_shot_mod.fpFB=motor_shot_up.anglev;
+				PID_Calc(&pid_shot_mod);
 				CAN_SendCurrent(&hcan1,0x200,pid_shot_mod.fpU,pid_shot_mod.fpU,0,0);		
+				last_state=0;
 				break;
 			case 1:
+			if(last_state!=1)
+			{
+				pid_shot.outer.fpSumE=0;
+				pid_shot.inner.fpSumE=0;		
+			}
 				pid_shot.outer.fpDes=des_shot;
 				pid_shot.outer.fpFB=motor_shot_up.angle;
 				pid_shot.inner.fpFB=motor_shot_up.anglev;
 				PID_Calc_DualLoop(&pid_shot);
-				CAN_SendCurrent(&hcan1,0x200,pid_shot.output,pid_shot.output,0,0);				
+				CAN_SendCurrent(&hcan1,0x200,pid_shot.output,pid_shot.output,0,0);		
+				last_state=1;
 				break;
 			case 2:
+				if(last_state!=2)
+				{
+				pid_shot.outer.fpSumE=0;
+				pid_shot.inner.fpSumE=0;		
+				}					
 				pid_shot.outer.fpDes=td_shot.x1;
 				pid_shot.outer.fpFB=motor_shot_up.angle;
 				pid_shot.inner.fpFB=motor_shot_up.anglev;
 				PID_Calc_DualLoop(&pid_shot);
 				CAN_SendCurrent(&hcan1,0x200,pid_shot.output,pid_shot.output,0,0);
+				last_state=2;
 				break;
 			default:
 				break;
@@ -323,6 +345,29 @@ void Tx_Task(void const * argument)
 		usart1_tx_buff[9]= flag_shot;  
 		HAL_UART_Transmit(&huart1,usart1_tx_buff,sizeof(usart1_tx_buff),1);
 		DC_Montor(des_pitch,fb_pitch,&pid_pitch);
+		
+		vofa_data.ch_data[0] = des_pitch;
+		vofa_data.ch_data[1] = fb_pitch;	
+		vofa_data.ch_data[2] = pid_shot.outer.fpDes;
+		vofa_data.ch_data[3] = pid_shot.outer.fpFB;	
+		vofa_data.ch_data[4] = pid_shot.inner.fpDes;
+		vofa_data.ch_data[5] = pid_shot.inner.fpFB;	
+		vofa_data.ch_data[6] = pid_shot_mod.fpDes;
+		vofa_data.ch_data[7] = pid_shot_mod.fpFB;	
+		vofa_data.ch_data[8]= flag_init;
+		vofa_data.ch_data[9]=flag_start;
+		vofa_data.ch_data[10]= flag_bounce;   
+		vofa_data.ch_data[11]= flag_lay;          
+		vofa_data.ch_data[12]= flag_aim;    
+		vofa_data.ch_data[13]= flag_shot;  
+		vofa_data.ch_data[14]= step_init;
+		vofa_data.ch_data[15]=step_start;
+		vofa_data.ch_data[16]= step_bounce;   
+		vofa_data.ch_data[17]= step_lay;          
+		vofa_data.ch_data[18]= step_aim;    
+		vofa_data.ch_data[19]= step_shot; 
+				
+	  VOFA_transmit_data(vofa_data.ch_data , 15);
 		system_monitor.rate_cnt.freertos_tx++;
 		vTaskDelay(pdMS_TO_TICKS(1));
   }

@@ -188,12 +188,13 @@ float leftb=3000;
 float rightb=-3000;
 float t1=0;//松手延时
 float t2=10;//反转延时
-float t3=80;//停转延时
+float t3=40;//停转延时
 float t4=100;//夹球延时
 float t5=70;//夹球延时
 float limit_a=100;//拍球
 float maxA=180;
-
+float current_a=8000;
+float current_b=16000;
 void Bounce_Task(const ST_COMMAND my_command)
 {
 		switch (step_bounce)
@@ -208,6 +209,8 @@ void Bounce_Task(const ST_COMMAND my_command)
 				if(fabs(fb_rotate-ROTATE_BOUNCE)<5)
 				{
 					step_bounce=1;
+					pid_bounce_left.fpOMax=current_a;
+					pid_bounce_right.fpOMax=current_a;
 				}
 				break;
 			case 1://往下转到特定速度 给延时
@@ -228,6 +231,8 @@ void Bounce_Task(const ST_COMMAND my_command)
 				if(fabs(fbv_bounce_left-BOUNCE_LEFT_BOUNCE)>maxA&&fabs(fbv_bounce_right-BOUNCE_RIGHT_BOUNCE)>maxA)
 				{
 				step_bounce=3;			
+				pid_bounce_left.fpOMax=current_b;
+				pid_bounce_right.fpOMax=current_b;
 				}	
 				break;
 			case 3://开始反转
@@ -253,13 +258,18 @@ void Bounce_Task(const ST_COMMAND my_command)
 				}
 				break;
 			case 6://3号时间到了进行
-				desq_catch=1;
 				time2_3++;
-			if(time2_3>t3)
+				if(time2_3>t3)
+				{
+				desq_catch=1;
+				time2_3=0;
+				}
+				time2_4++;
+			if(time2_4>t4)
 			{
 				desv_bounce_left=0;
 				desv_bounce_right=0;
-				time2_3=0;
+				time2_4=0;
 				step_bounce=7;
 			}
 				break;
@@ -268,6 +278,86 @@ void Bounce_Task(const ST_COMMAND my_command)
 				break;
 		}
 }
+
+//void Bounce_Task(const ST_COMMAND my_command)
+//{
+//		switch (step_bounce)
+//		{
+//			case 0://确保拍球位置和发射位置
+//				state_shot=2;
+//				state_pitch=0;
+//				des_rotate=ROTATE_BOUNCE;
+//				desq_catch=CATCH_CYLINDER_CATCH;
+//				des_shot=SHOT_LAY;
+//				des_pitch=PITCH_LAY;
+//				if(fabs(fb_rotate-ROTATE_BOUNCE)<5)
+//				{
+//					step_bounce=1;
+//					pid_bounce_left.fpOMax=12000;
+//					pid_bounce_right.fpOMax=12000;
+//				}
+//				break;
+//			case 1://往下转到特定速度 给延时
+//				desv_bounce_left=BOUNCE_LEFT_BOUNCE;
+//				desv_bounce_right=BOUNCE_RIGHT_BOUNCE;
+//				if(fabs(fbv_bounce_left-BOUNCE_LEFT_BOUNCE)<limit_a&&fabs(fbv_bounce_right-BOUNCE_RIGHT_BOUNCE)<limit_a)
+//				{
+//					time2_1++;
+//				}	
+//				if(time2_1>t1)
+//				{
+//					step_bounce=2;
+//					time2_1=0;
+//				}
+//				break;
+//			case 2://松手
+//				desq_catch = CATCH_CYLINDER_UNCATCH;
+//				if(fabs(fbv_bounce_left-BOUNCE_LEFT_BOUNCE)>maxA&&fabs(fbv_bounce_right-BOUNCE_RIGHT_BOUNCE)>maxA)
+//				{
+//				step_bounce=3;
+//					pid_bounce_left.fpOMax=16000;
+//					pid_bounce_right.fpOMax=16000;			
+//				}	
+//				break;
+//			case 3://开始反转
+//				time2_2++;
+//				if(time2_2>t2)
+//				{
+//					desv_bounce_left=BOUNCE_LEFT_BOUNCE_U;
+//					desv_bounce_right=BOUNCE_RIGHT_BOUNCE_U;
+//					time2_2=0;
+//					step_bounce=4;
+//				}
+//				break;
+//			case 4://检测向上碰撞
+//				if(my_command.air_flag==0)
+//				{
+//					step_bounce=5;	
+//				}
+//				break;		
+//			case 5://检测向上碰撞
+//				if(my_command.air_flag==1)
+//				{
+//					step_bounce=6;	
+//				}
+//				break;
+//			case 6://3号时间到了进行
+//				desq_catch=1;
+//				time2_3++;
+//			if(time2_3>t3)
+//			{
+//				desv_bounce_left=0;
+//				desv_bounce_right=0;
+//				time2_3=0;
+//				step_bounce=7;
+//			}
+//				break;
+//			case 7://结束！
+//				flag_bounce=0;
+//				break;
+//		}
+//}
+
 
 void Lay_Task(void)
 {
@@ -345,7 +435,8 @@ void Lay_Task(void)
 			break;
 	}		
 }
-	
+
+
 
 	
 void 	Aim_Task(const ST_COMMAND my_command)
@@ -375,7 +466,7 @@ void 	Aim_Task(const ST_COMMAND my_command)
 
 int t_up=15;
 int t_uniform=100;
-int t_down=80;
+int t_down=500;
 void Belt_Shot(const ST_COMMAND my_command)
 {
 	switch(step_shot)
@@ -404,7 +495,7 @@ void Belt_Shot(const ST_COMMAND my_command)
 		break;
 	case 2:
 		desv_shot=-my_command.command_shot.dapao;
-		if(SHOT_SHOT-fb_shot>20)
+		if(SHOT_SHOT-fb_shot>0)
 		{
 			step_shot=3;
 		}
@@ -428,7 +519,7 @@ void Belt_Shot(const ST_COMMAND my_command)
 		}
 		break;
 	case 5:
-		state_shot=1;
+		state_shot=2;
 		des_shot=SHOT_START;
 		if(fabs(fb_shot-SHOT_START)<1)
 		{

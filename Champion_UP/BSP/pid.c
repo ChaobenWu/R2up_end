@@ -127,3 +127,52 @@ float TD_END(ST_TD *pStTD,float end_pos)
 	CalTD(pStTD);
 	return pStTD->x1;
 }
+
+
+
+
+/*******************************************************************
+函数名称：CalSMC(ST_SMC *pStSMC)
+函数功能：滑模控制算法
+备    注：
+********************************************************************/
+void CalSMC(ST_SMC *pStSMC)
+{
+         pStSMC->TD.aim = pStSMC->fpDes;        
+         CalTD(&pStSMC->TD);
+         pStSMC->fpE = pStSMC->TD.x1 - pStSMC->fpFB;
+				 pStSMC->fpU = 1 / pStSMC->b * (pStSMC->TD.x2+ pStSMC->eps * SMC_SatFunc(pStSMC->fpE, pStSMC->dead)+ pStSMC->gain * pStSMC->fpE);
+				pStSMC->fpU = Clip(pStSMC->fpU, -pStSMC->fpUMax, pStSMC->fpUMax);
+}
+float SMC_SatFunc(float in, float d)
+{
+                if(fabs(in) >= d)
+                        return Sign_Judge(in);
+                else
+                        return in / d;
+}
+//这里将符号函数sgn()换成了饱和函数sat()，目的是防止抖震。
+/*******************************************************************
+函数名称：Sign_Judge(FP32 fp_Any_Number)
+函数功能：判断正负
+备    注：返回值为1和-1，来改变数的符号
+********************************************************************/
+int Sign_Judge(FP32 fp_Judge_Number)
+{
+        if(fp_Judge_Number >= 0)
+        {
+                return 1;
+        }
+        else 
+        {
+                return -1;
+        }
+}
+float Clip(float in,float min ,float max )
+{
+	if(in>max)
+		in=max;
+	if(in<min)
+		in=min;
+	return in;
+}

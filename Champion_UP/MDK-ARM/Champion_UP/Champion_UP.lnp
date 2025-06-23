@@ -44,6 +44,7 @@
 "champion_up\robot_init.o"
 "champion_up\system_monitor.o"
 "champion_up\types.o"
+"champion_up\vofa.o"
 "champion_up\logic.o"
 --library_type=microlib --strict --scatter "Champion_UP\Champion_UP.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols

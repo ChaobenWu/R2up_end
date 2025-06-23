@@ -277,7 +277,7 @@ extern float desv_bounce_right;//右
 
 extern uint8_t desq_catch;//收球气缸
 
-
+extern ST_SMC g_stFrictionSMC;
 extern int fb_pitch;//云台俯仰3508
 extern float fb_shot;//发射3508
 extern float fbv_shot;//发射（初始化用

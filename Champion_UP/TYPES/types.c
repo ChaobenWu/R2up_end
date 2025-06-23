@@ -240,6 +240,15 @@ ST_SHOT shot[10]={
 };
 
 
+ST_SMC g_stFrictionSMC={
+	.fpUMax=22000,
+	.b=0.5,
+	.eps=200,
+	.gain=300,
+	.dead=10,
+	.TD={0,0,0,800,50,2,0}
+};
+
 ST_LESO_1order order1=
 {
   .Beta01=60,//100

@@ -39,7 +39,12 @@ extern uint8_t flag_shot;
 extern uint8_t flag_init;
 extern uint8_t flag_start;
 
-
+extern int8_t step_init;
+extern int8_t step_start;
+extern int8_t step_bounce;
+extern int8_t step_lay;
+extern int8_t step_aim;
+extern int8_t step_shot;
 void Logic(const ST_COMMAND my_command);
 void Init_Task(void);//≥ı ºªØ
 void Start_Task(void);

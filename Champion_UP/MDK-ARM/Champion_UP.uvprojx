@@ -82,7 +82,7 @@
           </BeforeMake>
           <AfterMake>
             <RunUserProg1>0</RunUserProg1>
-            <RunUserProg2>0</RunUserProg2>
+            <RunUserProg2>1</RunUserProg2>
             <UserProg1Name></UserProg1Name>
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
@@ -669,6 +669,16 @@
               <FileName>types.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\TYPES\types.h</FilePath>
+            </File>
+            <File>
+              <FileName>VOFA.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\TYPES\VOFA.c</FilePath>
+            </File>
+            <File>
+              <FileName>VOFA.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\TYPES\VOFA.h</FilePath>
             </File>
           </Files>
         </Group>
