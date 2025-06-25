@@ -9,6 +9,7 @@ int8_t step_bounce=0;
 int8_t step_lay=0;
 int8_t step_aim=0;
 int8_t step_shot=0;
+int8_t step_out=0;
 
 int time0_1=0;
 int time0_2=0;
@@ -43,6 +44,10 @@ int time6_1=0;
 int time6_2=0;
 int time6_3=0;
 
+int time7_0=0;
+int time7_1=0;
+int time7_2=0;
+int time7_3=0;
 
 uint8_t flag_bounce=0;
 uint8_t flag_lay=0;
@@ -430,7 +435,6 @@ void Lay_Task(void)
 			if(fabs(fb_rotate-ROTATE_BOUNCE)<5)
 			{
 				flag_lay=0;
-				state_shot=0;
 			}	
 			break;
 	}		
@@ -533,3 +537,13 @@ void Belt_Shot(const ST_COMMAND my_command)
 		break;
 	}
 }
+//-2931
+
+
+//void Bounce_Out(void)
+//{
+//	switch(step_out)
+//	{
+//	case 0:
+		
+		

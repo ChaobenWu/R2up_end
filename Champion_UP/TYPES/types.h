@@ -298,6 +298,7 @@ extern ST_TD td_shot;
 extern ST_TD td_rotate;
 // 级联PID控制器
 extern ST_CASCADE_PID pid_shot;
+extern ST_CASCADE_PID pid_shot_td;
 extern ST_CASCADE_PID pid_rotate;
 extern ST_PID pid_pitch;
 // 单环PID控制器

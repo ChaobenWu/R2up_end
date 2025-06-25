@@ -56,12 +56,54 @@ ST_TD td_rotate=
 //pid
 ST_CASCADE_PID pid_shot = {
     .inner = {
-        .fpKp = 150.0f,
-        .fpKi = 0.07f,
+        .fpKp = 140.0f,
+        .fpKi = 0.45f,
+        .fpKd = 300.0f,
+        .fpDes = 0.0f,
+        .fpSumEMax = 2000.0f,
+        .fpEMax = 1000.0f,
+        .fpOMax = 22000.0f,
+        .fpEMin = 5.0f,
+        .fpFB = 0.0f,
+        .fpE = 0.0f,
+        .fpPreE = 0.0f,
+        .fpSumE = 0.0f,
+        .fpU = 0.0f,
+        .fpUKp = 0.0f,
+        .fpUKi = 0.0f,
+        .fpUKd = 0.0f,
+        .fpUKdpre = 0.0f
+    },
+    .outer = {
+        .fpKp =0.2f,
+        .fpKi = 0.005f,
         .fpKd = 0.0f,
         .fpDes = 0.0f,
-        .fpSumEMax = 10000.0f,
-        .fpEMax = 100.0f,
+        .fpSumEMax = 1000.0f,
+        .fpEMax = 30.0f,
+        .fpOMax = 180.0f,
+        .fpEMin = 0.0f,
+        .fpFB = 0.0f,
+        .fpE = 0.0f,
+        .fpPreE = 0.0f,
+        .fpSumE = 0.0f,
+        .fpU = 0.0f,
+        .fpUKp = 0.0f,
+        .fpUKi = 0.0f,
+        .fpUKd = 0.0f,
+        .fpUKdpre = 0.0f
+    },
+    .output = 0.0f
+};
+
+ST_CASCADE_PID pid_shot_td = {
+    .inner = {
+        .fpKp = 140.0f,
+        .fpKi = 0.45f,
+        .fpKd = 300.0f,
+        .fpDes = 0.0f,
+        .fpSumEMax = 2000.0f,
+        .fpEMax = 1000.0f,
         .fpOMax = 22000.0f,
         .fpEMin = 0.0f,
         .fpFB = 0.0f,
@@ -75,8 +117,8 @@ ST_CASCADE_PID pid_shot = {
         .fpUKdpre = 0.0f
     },
     .outer = {
-        .fpKp =1.0f,
-        .fpKi = 0.004f,
+        .fpKp =0.4f,
+        .fpKi = 0.003f,
         .fpKd = 0.0f,
         .fpDes = 0.0f,
         .fpSumEMax = 1000.0f,
@@ -97,11 +139,13 @@ ST_CASCADE_PID pid_shot = {
 };
 
 
+
+
 ST_CASCADE_PID pid_rotate= {
     .inner = {
         .fpKp = 200.0f,
         .fpKi = 0.001f,
-        .fpKd = 0.0f,
+        .fpKd = 200.0f,
         .fpDes = 0.0f,
         .fpSumEMax = 10000.0f,
         .fpEMax = 10000.0f,
@@ -183,11 +227,11 @@ ST_PID pid_bounce_right = {
 
 		
 ST_PID pid_shot_mod = {
-        .fpKp = 180.0f,
-        .fpKi = 3.6f,
-        .fpKd = 2.0f,
+        .fpKp = 160.0f,//140
+        .fpKi = 0.65f,//0.45
+        .fpKd = 300.0f,
         .fpDes = 0.0f,
-        .fpSumEMax = 1000.0f,
+        .fpSumEMax = 2000.0f,
         .fpEMax = 1000.0f,
         .fpOMax = 22000.0f,
         .fpEMin = 0.0f,

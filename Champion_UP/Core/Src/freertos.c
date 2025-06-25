@@ -230,7 +230,7 @@ void Control_Task(void const * argument)
 				pid_shot_mod.fpDes=desv_shot;
 				pid_shot_mod.fpFB=motor_shot_up.anglev;
 				PID_Calc(&pid_shot_mod);
-				CAN_SendCurrent(&hcan1,0x200,pid_shot_mod.fpU,pid_shot_mod.fpU,0,0);		
+				CAN_SendCurrent(&hcan1,0x200,pid_shot_mod.fpU-800,pid_shot_mod.fpU-800,0,0);		
 				last_state=0;
 				break;
 			case 1:
