@@ -134,18 +134,29 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 					  case 0x310: // 电推杆
 							fb_pitch = ((RxMsg_CAN1[1]<<8)&0xFF00)|(RxMsg_CAN1[0]&0x00FF);
 							system_monitor.rate_cnt.motor_pitch++;
-							break;
-					  case 0x20: // 行程开关
-							if((RxMsg_CAN1[1] & 0x08) == 0)
+							
+							
+							if((RxMsg_CAN1[2] & 0x08) == 0)
 							{
 								command0.air_flag=0;
 							}
-							if((RxMsg_CAN1[1] & 0x08) == 0x08)
+							if((RxMsg_CAN1[2] & 0x08) == 0x08)
 							{
 								command0.air_flag=1;
-							}
-							system_monitor.rate_cnt.air_receive++;
-							break;			
+							}							
+							system_monitor.rate_cnt.air_receive++;							
+							break;
+//					  case 0x30: // 行程开关
+//							if((RxMsg_CAN1[1] & 0x08) == 0)
+//							{
+//								command0.air_flag=0;
+//							}
+//							if((RxMsg_CAN1[1] & 0x08) == 0x08)
+//							{
+//								command0.air_flag=1;
+//							}
+//							system_monitor.rate_cnt.air_receive++;
+//							break;			
 						case 0x201://下航模
 							if(motor_shot_down.state==1)
 							{		
@@ -157,7 +168,10 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 								memcpy(&motor_shot_down.mech_angle, &RxMsg_CAN1, 4);  // 位置
 								motor_shot_down.angle=motor_shot_down.mech_angle-motor_shot_down.diff_angle;
 							}
-							memcpy(&motor_shot_down.anglev, &RxMsg_CAN1[4], 4);  // 速度
+							memcpy(&motor_shot_down.mech_anglev, &RxMsg_CAN1[4], 4);  // 速度
+							shot_down_filter.in=motor_shot_down.mech_anglev;
+							LpFilter(&shot_down_filter);
+							motor_shot_down.anglev=shot_down_filter.out;
 							Cacul_w(&motor_shot_down);
 							system_monitor.rate_cnt.motor_shot_down++;
 							break;
@@ -172,7 +186,10 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 								memcpy(&motor_shot_up.mech_angle, &RxMsg_CAN1, 4);  // 位置
 								motor_shot_up.angle=motor_shot_up.mech_angle-motor_shot_up.diff_angle;
 							}
-							memcpy(&motor_shot_up.anglev, &RxMsg_CAN1[4], 4);  // 速度
+							memcpy(&motor_shot_up.mech_anglev, &RxMsg_CAN1[4], 4);  // 速度
+							shot_up_filter.in=motor_shot_up.mech_anglev;
+							LpFilter(&shot_up_filter);
+							motor_shot_up.anglev=shot_up_filter.out;
 							Cacul_w(&motor_shot_up);
 							fbv_shot=motor_shot_up.anglev;
 							fb_shot=motor_shot_up.angle;

@@ -176,3 +176,70 @@ float Clip(float in,float min ,float max )
 		in=min;
 	return in;
 }
+
+
+
+//void Pi_Caculate(float *p,float *i,float v)
+//{
+//	if(v>250&&v<=260)
+//	{
+//		p=0;
+//		i=0;
+//	}
+//}
+
+
+void PID_Calc_Pitch(ST_PID *pstPid)
+{
+    // 计算本次偏差
+    pstPid->fpE = pstPid->fpDes - pstPid->fpFB;
+
+    // 如果误差在死区范围内，则将误差视为0
+    if (fabs(pstPid->fpE) <= pstPid->fpEMin)
+    {
+        pstPid->fpE = 0.0f;
+    }
+
+    // 积分分离：当偏差大于设定的最大偏差值时，不进行积分作用
+    if (fabs(pstPid->fpE) < pstPid->fpEMax)
+    {
+        pstPid->fpSumE += pstPid->fpE; // 累积偏差
+    }
+
+    pstPid->fpSumE *= 0.99;
+    // 积分限幅
+    if (pstPid->fpSumE > pstPid->fpSumEMax)
+    {
+        pstPid->fpSumE = pstPid->fpSumEMax;
+    }
+    else if (pstPid->fpSumE < -pstPid->fpSumEMax)
+    {
+        pstPid->fpSumE = -pstPid->fpSumEMax;
+    }
+    // 计算比例项
+    pstPid->fpUKp = pstPid->fpKp * pstPid->fpE;
+
+    // 计算积分项（注意Ki已经乘在累积偏差上）
+    pstPid->fpUKi = pstPid->fpKi * pstPid->fpSumE;
+		
+    // 微分先行，避免反馈值的噪声对微分项的影响
+    float diffE = (pstPid->fpE - pstPid->fpPreE);
+    pstPid->fpUKd = pstPid->fpKd * diffE;
+
+    // 更新本次PID运算结果
+    pstPid->fpU = pstPid->fpUKp + pstPid->fpUKi + pstPid->fpUKd;
+
+    // 输出限幅
+    if (pstPid->fpU > pstPid->fpOMax)
+    {
+        pstPid->fpU = pstPid->fpOMax;
+    }
+    else if (pstPid->fpU < -pstPid->fpOMax)
+    {
+        pstPid->fpU = -pstPid->fpOMax;
+    }
+
+    // 更新上次偏差和上次微分项输出
+    pstPid->fpPreE = pstPid->fpE;
+    pstPid->fpUKdpre = pstPid->fpUKd;
+}

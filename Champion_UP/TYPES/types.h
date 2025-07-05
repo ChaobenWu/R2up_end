@@ -61,7 +61,7 @@ typedef double          DB64;     /**< 双精度浮点数类型（64位） */
 #define M3508_uiGearRatio  19        /**< M3508齿轮比 */
 #define M2006_uiGearRatio  36        /**< M2006齿轮比 */
 #define M3508_siNumber     8192      /**< M3508编码器线数 */
-#define CANRXVALVEID  0x40                     //气动控制ID（电磁阀）
+#define CANRXVALVEID  0x400                     //气动控制ID（电磁阀）
 
 /** -----------------------------
 ================================
@@ -144,6 +144,7 @@ typedef struct
 {
 	int state;
 	float motor_current;//发送的电流
+	float mech_anglev;//接收到的电机返回速度	
 	float anglev;//接收到的电机返回速度
 	float mech_angle;//接收到的电机返回位置
 	float angle;//处理后的电机位置
@@ -236,6 +237,8 @@ typedef struct
 	int lay;
 	int aim;
 	int shot;
+	int out;
+	int danger;
 	int flag_aim;
 	int number_aim;
 	int air_flag;	
@@ -260,6 +263,18 @@ typedef struct
 
   float fpUMax;
 }ST_LESO_1order;
+
+
+ //一阶低通滤波
+typedef struct
+{
+    float preout;     //上一个输出值，用于保持滤波器状态，以便在连续调用之间维持滤波效果
+    float out;        //当前输出值，即经过低通滤波处理后的信号
+    float in;         //输入值，这是将要被滤波的原始信号
+    float off_freq;   // 截止频率或称为权重，它决定了哪些频率成分可以通过滤波器
+    float samp_tim;   //采样步长（时间），两次采样之间的时间，它对确定滤波器的时间常数至关重要
+} ST_LPF;             //定义了一阶低通滤波器的结构体，一阶意味着它的传递函数有一阶多项式
+
 //下面这些玩意儿是声明，只能放需要在多个文件中使用的全局变量
 extern int state_shot;
 extern int state_pitch;
@@ -296,6 +311,9 @@ extern ST_MOTOR_H motor_shot_down;
 extern ST_TD td_pitch;
 extern ST_TD td_shot;
 extern ST_TD td_rotate;
+//一阶低通滤波器
+extern ST_LPF shot_up_filter;
+extern ST_LPF shot_down_filter;
 // 级联PID控制器
 extern ST_CASCADE_PID pid_shot;
 extern ST_CASCADE_PID pid_shot_td;
@@ -309,7 +327,7 @@ extern ST_PID pid_shot_mod;
 // 系统监控和命令结构
 extern ST_SYSTEM_MONITOR system_monitor;
 extern ST_COMMAND command0;
-extern ST_SHOT shot[10];
+extern ST_SHOT shot[5];
 
 
 extern float distance;
@@ -317,13 +335,15 @@ extern float yaw;
 extern ST_LESO_1order order1;
 extern ST_LESO_1order order2;
 extern ST_LESO_1order order3;
+
+extern uint16_t DC_motor_fpU;//电推杆反馈位置
+extern uint16_t DC_motor_Des;//电推杆目标位置
 //下面这些玩意儿是一些通用函数;
 float LimitMax(float fpValue, float fpMin, float fpMax);
 int Sgn(float y);
 void LESO_Order1(ST_LESO_1order * leso_1order, float y,float U0);
+void LpFilter(ST_LPF *lpf);
 
-extern uint16_t DC_motor_fpU;//电推杆反馈位置
-extern uint16_t DC_motor_Des;//电推杆目标位置
 
 
 #endif // __TYPES_H__

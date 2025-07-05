@@ -53,17 +53,21 @@ ST_TD td_rotate=
 { .x1 = 0, .x2 = 0, .x = 0, .r = 5000, .T = 0.001, .h = 0.002};
 
 
+//滤波器
+ST_LPF shot_up_filter={.off_freq=200,.samp_tim=0.001};
+ST_LPF shot_down_filter={.off_freq=200,.samp_tim=0.001};
+
 //pid
 ST_CASCADE_PID pid_shot = {
     .inner = {
-        .fpKp = 140.0f,
-        .fpKi = 0.45f,
-        .fpKd = 300.0f,
+        .fpKp = 180.0f,//140
+        .fpKi = 1.4f,//0.45//0.8
+        .fpKd = 0.0f,
         .fpDes = 0.0f,
-        .fpSumEMax = 2000.0f,
+        .fpSumEMax = 15000.0f,
         .fpEMax = 1000.0f,
         .fpOMax = 22000.0f,
-        .fpEMin = 5.0f,
+        .fpEMin = 0.5f,
         .fpFB = 0.0f,
         .fpE = 0.0f,
         .fpPreE = 0.0f,
@@ -75,13 +79,13 @@ ST_CASCADE_PID pid_shot = {
         .fpUKdpre = 0.0f
     },
     .outer = {
-        .fpKp =0.2f,
-        .fpKi = 0.005f,
+        .fpKp =0.3f,
+        .fpKi = 0.0f,
         .fpKd = 0.0f,
         .fpDes = 0.0f,
         .fpSumEMax = 1000.0f,
         .fpEMax = 30.0f,
-        .fpOMax = 180.0f,
+        .fpOMax = 250.0f,
         .fpEMin = 0.0f,
         .fpFB = 0.0f,
         .fpE = 0.0f,
@@ -98,14 +102,14 @@ ST_CASCADE_PID pid_shot = {
 
 ST_CASCADE_PID pid_shot_td = {
     .inner = {
-        .fpKp = 140.0f,
-        .fpKi = 0.45f,
-        .fpKd = 300.0f,
+        .fpKp = 180.0f,//140
+        .fpKi = 1.4f,//0.45//0.8
+        .fpKd = 0.0f,
         .fpDes = 0.0f,
-        .fpSumEMax = 2000.0f,
+        .fpSumEMax = 15000.0f,
         .fpEMax = 1000.0f,
         .fpOMax = 22000.0f,
-        .fpEMin = 0.0f,
+        .fpEMin = 0.5f,
         .fpFB = 0.0f,
         .fpE = 0.0f,
         .fpPreE = 0.0f,
@@ -117,14 +121,14 @@ ST_CASCADE_PID pid_shot_td = {
         .fpUKdpre = 0.0f
     },
     .outer = {
-        .fpKp =0.4f,
-        .fpKi = 0.003f,
+        .fpKp =0.3f,
+        .fpKi = 0.0f,
         .fpKd = 0.0f,
         .fpDes = 0.0f,
         .fpSumEMax = 1000.0f,
         .fpEMax = 30.0f,
-        .fpOMax = 180.0f,
-        .fpEMin = 0.8f,
+        .fpOMax = 250.0f,
+        .fpEMin = 0.0f,
         .fpFB = 0.0f,
         .fpE = 0.0f,
         .fpPreE = 0.0f,
@@ -227,12 +231,12 @@ ST_PID pid_bounce_right = {
 
 		
 ST_PID pid_shot_mod = {
-        .fpKp = 160.0f,//140
-        .fpKi = 0.65f,//0.45
-        .fpKd = 300.0f,
+        .fpKp = 195.0f,//140
+        .fpKi = 0.041f,//0.45//0.8
+        .fpKd = 0.0f,
         .fpDes = 0.0f,
-        .fpSumEMax = 2000.0f,
-        .fpEMax = 1000.0f,
+        .fpSumEMax = 15000.0f,
+        .fpEMax = 325.0f,
         .fpOMax = 22000.0f,
         .fpEMin = 0.0f,
         .fpFB = 0.0f,
@@ -247,14 +251,14 @@ ST_PID pid_shot_mod = {
     };
 		
 ST_PID pid_pitch = {
-        .fpKp = 95.0f,
-        .fpKi = 0.03f,
-        .fpKd = 2.0f,
+        .fpKp = 75.0f,//95
+        .fpKi = 0.1f,//0.26
+        .fpKd = 200.0f,//2
         .fpDes = 0.0f,
-        .fpSumEMax = 1000.0f,
-        .fpEMax = 50.0f,
+        .fpSumEMax = 2000.0f,
+        .fpEMax = 10000.0f,
         .fpOMax = 2000.0f,
-        .fpEMin = 6.0f,
+        .fpEMin = 3.0f,
         .fpFB = 0.0f,
         .fpE = 0.0f,
         .fpPreE = 0.0f,
@@ -270,17 +274,12 @@ ST_SYSTEM_MONITOR system_monitor={0};
 ST_COMMAND command0={0};
 
 //备用，当垃圾的时候使用
-ST_SHOT shot[10]={
+ST_SHOT shot[5]={
 {0},//0,
-{.pitch=7000,.dapao=12000},//1
-{.pitch=1500,.dapao=3000},//2
-{.pitch=1500,.dapao=3000},//3
-{.pitch=1500,.dapao=3000},//4
-{.pitch=1500,.dapao=3000},//5
-{.pitch=1500,.dapao=3000},//6
-{.pitch=1500,.dapao=3000},//7
-{.pitch=1500,.dapao=3000},//8
-{.pitch=1500,.dapao=3000},//9
+{.pitch=7298,.dapao=344.8},//1
+{.pitch=7298,.dapao=344.8},//2
+{.pitch=7298,.dapao=344.8},//3
+{.pitch=7298,.dapao=344.8},//4
 };
 
 
@@ -395,4 +394,37 @@ void LESO_Order1(ST_LESO_1order * leso_1order, float y,float U0)
 
 	if(leso_1order->U>=leso_1order->fpUMax) leso_1order->U = leso_1order->fpUMax;
 	if(leso_1order->U<=-leso_1order->fpUMax) leso_1order->U = -leso_1order->fpUMax;
+}
+
+
+
+/*******************************************************************************************
+函数名称：LpFilter()
+函数功能：一阶低通滤波器，用于平滑输入信号，去除高频噪声
+输入：   1. lpf 指向低通滤波器结构体的指针，结构体成员包括：
+             - off_freq：截止频率
+             - samp_tim：采样时间
+             - in：当前输入信号
+             - preout：上一次输出信号
+输出：   1. lpf->out：滤波后的输出信号
+原理：   1. 滤波器通过加权平均当前输入信号和上一次输出信号来平滑信号：
+             - fir_a = 1 / (1 + off_freq * samp_tim)
+             - out = fir_a * preout + (1 - fir_a) * in
+          2. `fir_a` 控制滤波器对历史数据和当前数据的加权：
+             - `fir_a` 越小，表示滤波器对历史数据的加权越大，输出更平滑但响应较慢。
+             - `fir_a` 越大，表示滤波器对当前数据的加权越大，响应更快但平滑效果减弱。
+          3. 本函数常用于传感器数据的滤波处理，尤其适用于需要去除高频噪声的信号，如加速度计、陀螺仪等。
+*******************************************************************************************/
+void LpFilter(ST_LPF *lpf)
+{
+    // 计算滤波器系数 fir_a，基于截止频率和采样时间的典型公式：
+    // fir_a = 1 / (1 + 截止频率 * 采样时间)
+    float fir_a = 1 / (1 + lpf->off_freq * lpf->samp_tim);
+
+    // 根据当前输入信号和上一次的输出信号计算新的输出值：
+    // 输出是当前输入信号和历史输出信号的加权平均，权重由 fir_a 决定
+    lpf->out = fir_a * lpf->preout + (1 - fir_a) * lpf->in;
+
+    // 更新历史输出值，为下次调用提供参考
+    lpf->preout = lpf->out;
 }

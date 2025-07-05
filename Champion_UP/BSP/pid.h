@@ -13,7 +13,8 @@ void CalSMC(ST_SMC *pStSMC);
 float SMC_SatFunc(float in, float d);
 int Sign_Judge(FP32 fp_Judge_Number);
 float Clip(float in,float min ,float max );
-
+void PID_Calc_Pitch(ST_PID *pstPid);
+//void Pi_Caculate(float *p,float *i,float v);
 
 
 #endif //

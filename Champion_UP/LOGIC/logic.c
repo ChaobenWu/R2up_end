@@ -2,7 +2,7 @@
 #include "logic.h"
 #include <stdlib.h>
 #include <math.h>
-
+float Shot_Shot=-2000;
 int8_t step_init=0;
 int8_t step_start=0;
 int8_t step_bounce=0;
@@ -10,6 +10,9 @@ int8_t step_lay=0;
 int8_t step_aim=0;
 int8_t step_shot=0;
 int8_t step_out=0;
+int8_t step_danger=0;
+
+float fb_max=0;
 
 int time0_1=0;
 int time0_2=0;
@@ -55,10 +58,14 @@ uint8_t flag_aim=0;
 uint8_t flag_shot=0;
 uint8_t flag_init=0;
 uint8_t flag_start=0;
+uint8_t flag_out=0;
+uint8_t flag_danger=0;
+
 
 
 void Logic(const ST_COMMAND my_command)
 {
+
 		//初始化任务
 			if(my_command.init)
 			{
@@ -121,8 +128,26 @@ void Logic(const ST_COMMAND my_command)
 			{
 				Belt_Shot(my_command);
 			}
-
-
+		//吸球任务
+			if(my_command.out)
+			{
+				flag_out=1;
+				step_out=0;
+			}
+			if(flag_out)
+			{
+			Bounce_Out(my_command);
+			}
+		//危险任务
+			if(my_command.danger)
+			{
+				flag_danger=1;
+				step_danger=0;
+			}
+			if(flag_danger)
+			{
+			Danger();
+			}
  
 			
 }
@@ -187,19 +212,19 @@ void Start_Task(void)//初始化
 }
 
 
-float lefta=-3200;
-float righta=3200;
-float leftb=3000;
-float rightb=-3000;
+float lefta=-2600;
+float righta=2600;
+float leftb=3600;
+float rightb=-3600;
 float t1=0;//松手延时
 float t2=10;//反转延时
 float t3=40;//停转延时
-float t4=100;//夹球延时
+float t4=150;//夹球延时
 float t5=70;//夹球延时
 float limit_a=100;//拍球
 float maxA=180;
 float current_a=8000;
-float current_b=16000;
+float current_b=8000;
 void Bounce_Task(const ST_COMMAND my_command)
 {
 		switch (step_bounce)
@@ -215,7 +240,7 @@ void Bounce_Task(const ST_COMMAND my_command)
 				{
 					step_bounce=1;
 					pid_bounce_left.fpOMax=current_a;
-					pid_bounce_right.fpOMax=current_a;
+					pid_bounce_right.fpOMax=current_b;
 				}
 				break;
 			case 1://往下转到特定速度 给延时
@@ -236,8 +261,8 @@ void Bounce_Task(const ST_COMMAND my_command)
 				if(fabs(fbv_bounce_left-BOUNCE_LEFT_BOUNCE)>maxA&&fabs(fbv_bounce_right-BOUNCE_RIGHT_BOUNCE)>maxA)
 				{
 				step_bounce=3;			
-				pid_bounce_left.fpOMax=current_b;
-				pid_bounce_right.fpOMax=current_b;
+				pid_bounce_left.fpOMax=14000;
+				pid_bounce_right.fpOMax=14000;
 				}	
 				break;
 			case 3://开始反转
@@ -375,7 +400,7 @@ void Lay_Task(void)
 			des_shot=SHOT_LAY;
 			des_pitch=PITCH_LAY;
 			if(fabs(fb_shot-SHOT_LAY)<5&&
-			abs(fb_pitch-PITCH_LAY)<5)
+			abs(fb_pitch-PITCH_LAY)<10)
 			{
 				step_lay=1;
 			}
@@ -454,7 +479,7 @@ void 	Aim_Task(const ST_COMMAND my_command)
 			des_pitch=my_command.command_shot.pitch;
 			des_rotate=ROTATE_BOUNCE;
 			
-			if(fabs(fb_pitch-my_command.command_shot.pitch)<5&&fabs(fb_rotate-ROTATE_BOUNCE)<1&&fabs(fb_shot-SHOT_START)<5)
+			if(fabs(fb_pitch-my_command.command_shot.pitch)<10&&fabs(fb_rotate-ROTATE_BOUNCE)<1&&fabs(fb_shot-SHOT_START)<5)
 			{
 				step_aim=1;
 			}
@@ -468,20 +493,23 @@ void 	Aim_Task(const ST_COMMAND my_command)
 
 
 
-int t_up=15;
+int t_up=100;
 int t_uniform=100;
 int t_down=500;
+float un_shotv=100;
+
 void Belt_Shot(const ST_COMMAND my_command)
 {
 	switch(step_shot)
 	{
 	case 0:
 		state_shot=2;
-		state_pitch=0;
+		state_pitch=0;//0
+		fb_max=0;
 		des_shot=SHOT_START;
 		des_pitch=my_command.command_shot.pitch;
 		des_rotate=ROTATE_BOUNCE;		
-		if(fabs(fb_pitch-my_command.command_shot.pitch)<10&&fabs(fb_rotate-ROTATE_BOUNCE)<1&&fabs(fb_shot-SHOT_START)<8)
+		if(fabs(fb_pitch-my_command.command_shot.pitch)<100&&fabs(fb_rotate-ROTATE_BOUNCE)<1&&fabs(fb_shot-SHOT_START)<5)
 			{
 				step_shot=1;
 			}	
@@ -499,14 +527,20 @@ void Belt_Shot(const ST_COMMAND my_command)
 		break;
 	case 2:
 		desv_shot=-my_command.command_shot.dapao;
-		if(SHOT_SHOT-fb_shot>0)
+		
+		if(Shot_Shot-fb_shot>0)
 		{
 			step_shot=3;
 		}
 		break;
 	case 3:
 		time6_1++;
-		desv_shot=100;
+		state_shot=3;
+		desv_shot=un_shotv;
+		if(fb_shot>fb_max)
+		{
+			fb_max=fb_shot;
+		}
 		if(time6_1>t_uniform)
 		{
 			step_shot=4;
@@ -540,10 +574,71 @@ void Belt_Shot(const ST_COMMAND my_command)
 //-2931
 
 
-//void Bounce_Out(void)
-//{
-//	switch(step_out)
-//	{
-//	case 0:
+void Bounce_Out(const ST_COMMAND my_command)
+{
+	switch(step_out)
+	{
+		case 0:
+			desq_catch=0;
+			desv_bounce_left=BOUNCE_LEFT_BOUNCE_U;
+			desv_bounce_right=BOUNCE_RIGHT_BOUNCE_U;
+			step_out=1;
+			break;	
+		case 1://检测向上碰撞
+				if(my_command.air_flag==1)
+				{
+					step_out=2;	
+				}
+				break;
+		case 2://3号时间到了进行
+				time7_1++;
+				if(time7_1>t3)
+				{
+				desq_catch=1;
+				time7_1=0;
+				}
+				time7_2++;
+			if(time7_2>t4)
+			{
+				desv_bounce_left=0;
+				desv_bounce_right=0;
+				time7_2=0;
+				step_out=3;
+			}
+				break;
+			case 3://结束！
+				flag_out=0;
+				break;
+		}
 		
-		
+}	
+
+void Danger(void)
+{
+	switch(step_danger)
+	{
+		case 0://把球推进去，然后把云台抬起来
+			state_pitch=0;
+			state_shot=2;
+			desq_catch=CATCH_CYLINDER_CATCH;
+			des_shot=SHOT_LAY;
+			des_pitch=PITCH_LAY;
+			if(fabs(fb_shot-SHOT_LAY)<5&&
+			abs(fb_pitch-PITCH_LAY)<10)
+			{
+				step_danger=1;
+			}
+			break;
+		case 1:
+			des_rotate=ROTATE_LAY;
+			if(fabs(fb_rotate-ROTATE_LAY)<5)
+			{
+				step_danger=2;
+			}
+			break;
+		case 2:
+			flag_danger=0;
+			break;
+	}	
+}
+

@@ -40,6 +40,9 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 int last_state=-1;
+float kp=190;
+float ki=0.037;
+int fuck=0;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -215,11 +218,7 @@ void Control_Task(void const * argument)
 		PID_Calc_DualLoop(&pid_rotate);		
 		
 		td_shot.aim=des_shot;
-		CalTD(&td_shot);	
-//		g_stFrictionSMC.fpDes=desv_shot;
-//		g_stFrictionSMC.fpFB=motor_shot_up.anglev;
-//		CalSMC(&g_stFrictionSMC);
-//		CAN_SendCurrent(&hcan1,0x200,g_stFrictionSMC.fpU,g_stFrictionSMC.fpU,0,0);	
+		CalTD(&td_shot);			
 		switch(state_shot)
 		{
 			case 0:	
@@ -227,7 +226,9 @@ void Control_Task(void const * argument)
 			{
 				pid_shot_mod.fpSumE=0;
 			}
-				pid_shot_mod.fpDes=desv_shot;
+			pid_shot_mod.fpKp=kp;
+			pid_shot_mod.fpKi=ki;
+			pid_shot_mod.fpDes=desv_shot;
 				pid_shot_mod.fpFB=motor_shot_up.anglev;
 				PID_Calc(&pid_shot_mod);
 				CAN_SendCurrent(&hcan1,0x200,pid_shot_mod.fpU-800,pid_shot_mod.fpU-800,0,0);		
@@ -243,7 +244,7 @@ void Control_Task(void const * argument)
 				pid_shot.outer.fpFB=motor_shot_up.angle;
 				pid_shot.inner.fpFB=motor_shot_up.anglev;
 				PID_Calc_DualLoop(&pid_shot);
-				CAN_SendCurrent(&hcan1,0x200,pid_shot.output,pid_shot.output,0,0);		
+				CAN_SendCurrent(&hcan1,0x200,pid_shot.output-300,pid_shot.output-300,0,0);		
 				last_state=1;
 				break;
 			case 2:
@@ -256,8 +257,21 @@ void Control_Task(void const * argument)
 				pid_shot.outer.fpFB=motor_shot_up.angle;
 				pid_shot.inner.fpFB=motor_shot_up.anglev;
 				PID_Calc_DualLoop(&pid_shot);
-				CAN_SendCurrent(&hcan1,0x200,pid_shot.output,pid_shot.output,0,0);
+		  	CAN_SendCurrent(&hcan1,0x200,pid_shot.output-300,pid_shot.output-300,0,0);
 				last_state=2;
+				break;
+			case 3:
+			if(last_state!=3)
+			{
+				pid_shot_mod.fpSumE=0;
+			}
+				pid_shot_mod.fpDes=desv_shot;
+				pid_shot_mod.fpKp=160;
+				pid_shot_mod.fpKi=0.6;
+				pid_shot_mod.fpFB=motor_shot_up.anglev;
+				PID_Calc(&pid_shot_mod);
+				CAN_SendCurrent(&hcan1,0x200,pid_shot_mod.fpU,pid_shot_mod.fpU,0,0);		
+				last_state=3;
 				break;
 			default:
 				break;
@@ -323,6 +337,7 @@ void Tx_Task(void const * argument)
   for(;;)
   {
 		usart1_tx_buff[0]=0x66;
+		usart1_tx_buff[1]=0x88;		
 		usart1_tx_buff[2]=0;
 		usart1_tx_buff[3]=0;		
 		for (int i = 0; i < 8; i++) {
@@ -337,12 +352,20 @@ void Tx_Task(void const * argument)
 		usart1_tx_buff[7]=0;
 		usart1_tx_buff[8]=0;
 		usart1_tx_buff[9]=0;
+		usart1_tx_buff[10]=0;	
+		usart1_tx_buff[11]=0;	
 		usart1_tx_buff[4]= flag_init;
 		usart1_tx_buff[5]=flag_start;
 		usart1_tx_buff[6]= flag_bounce;   
 		usart1_tx_buff[7]= flag_lay;          
 		usart1_tx_buff[8]= flag_aim;    
-		usart1_tx_buff[9]= flag_shot;  
+		usart1_tx_buff[9]= flag_shot; 
+		usart1_tx_buff[10]= flag_out;	
+		usart1_tx_buff[11]= flag_danger;			
+		uint16_t crc = crc16(&usart1_tx_buff[2], 13);
+		usart1_tx_buff[15] = crc & 0xFF;       // 低字节
+		usart1_tx_buff[16] = (crc >> 8) & 0xFF; // 高字节
+		usart1_tx_buff[17]= 0xFF;  
 		HAL_UART_Transmit(&huart1,usart1_tx_buff,sizeof(usart1_tx_buff),1);
 		DC_Montor(des_pitch,fb_pitch,&pid_pitch);
 		

@@ -282,17 +282,16 @@ void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
 if (__HAL_UART_GET_FLAG(&huart1, UART_FLAG_IDLE) == 1)
-  {            
+  {
       __HAL_UART_CLEAR_IDLEFLAG(&huart1);
 		//	while (HAL_DMA_GetState(&hdma_usart1_rx) != HAL_DMA_STATE_READY);
-			HAL_UART_DMAStop(&huart1);
-			remaining = __HAL_DMA_GET_COUNTER(huart1.hdmarx);
+		HAL_UART_DMAStop(&huart1);
+		remaining = __HAL_DMA_GET_COUNTER(huart1.hdmarx);
 //***************************************************************//
 //			HAL_UART_DMAResume(&huart1);          
-  
-		HAL_UART_Receive_DMA(&huart1, usart1_rx_buff, 30);		
+		HAL_UART_Receive_DMA(&huart1, usart1_rx_buff, 30-remaining);		
 
-			HAL_UART_DMAResume(&huart1);          
+			//HAL_UART_DMAResume(&huart1);          
  }
       
   /* USER CODE END USART1_IRQn 0 */
