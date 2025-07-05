@@ -3,14 +3,14 @@
 #include <stdlib.h>
 #include <math.h>
 float Shot_Shot=-2000;
-int8_t step_init=0;
-int8_t step_start=0;
-int8_t step_bounce=0;
-int8_t step_lay=0;
-int8_t step_aim=0;
-int8_t step_shot=0;
-int8_t step_out=0;
-int8_t step_danger=0;
+uint8_t step_init=0;
+uint8_t step_start=0;
+uint8_t step_bounce=0;
+uint8_t step_lay=0;
+uint8_t step_aim=0;
+uint8_t step_shot=0;
+uint8_t step_out=0;
+uint8_t step_danger=0;
 
 float fb_max=0;
 
@@ -61,95 +61,107 @@ uint8_t flag_start=0;
 uint8_t flag_out=0;
 uint8_t flag_danger=0;
 
+volatile uint8_t task_running = 0;  // 0: 无任务, 1: 有任务
+
+// 检查并设置任务状态
+uint8_t start_task(uint8_t *flag, uint8_t *step) {
+    // 如果没有任务运行，启动新任务
+    if (!task_running) {
+        task_running = 1;  // 设置任务运行标志
+        *flag = 1;         // 设置任务标志
+        *step = 0;         // 重置任务步骤
+        return 1;          // 成功启动任务
+    }
+    return 0;  // 无法启动任务
+}
+
+// 任务完成时调用
+void end_task(void) {
+    task_running = 0;  // 清除任务运行标志
+}
 
 
 void Logic(const ST_COMMAND my_command)
 {
+    // 初始化任务
+    if (my_command.init) {
+        if (start_task(&flag_init, &step_init)) {
+            // 任务已启动
+        }
+    }
+    if (flag_init) {
+        Init_Task();
+    }
+    
+    // 启动任务
+    if (my_command.start) {
+        if (start_task(&flag_start, &step_start)) {
+            // 任务已启动
+        }
+    }
+    if (flag_start) {
+        Start_Task();
+    }
 
-		//初始化任务
-			if(my_command.init)
-			{
-				flag_init=1;
-				step_init=0;
-			}
-			if(flag_init)
-			{
-				Init_Task();
-			}
-		//启动任务
-			if(my_command.start)
-			{
-				flag_start=1;
-				step_start=0;
-			}
-			if(flag_start)
-			{
-				Start_Task();
-			}
+    // 运球任务
+    if (my_command.bounce) {
+        if (start_task(&flag_bounce, &step_bounce)) {
+            // 任务已启动
+        }
+    }
+    if (flag_bounce) {
+        Bounce_Task(my_command);
+    }
+    
+    // 放球任务
+    if (my_command.lay) {
+        if (start_task(&flag_lay, &step_lay)) {
+            // 任务已启动
+        }
+    }
+    if (flag_lay) {
+        Lay_Task();
+    }
 
-		//运球任务
-			if(my_command.bounce)
-			{
-				flag_bounce=1;
-				step_bounce=0;
-			}
-			if(flag_bounce)
-			{
-				Bounce_Task(my_command);
-			}
-		//放球任务
-			if(my_command.lay)
-			{
-				flag_lay=1;
-				step_lay=0;
-			}
-			if(flag_lay)
-			{
-				Lay_Task();
-			}
-
-		//瞄准任务
-			if(my_command.aim)
-			{
-				flag_aim=1;
-				step_aim=0;
-			}
-			if(flag_aim)
-			{
-				Aim_Task(my_command);
-			}
-		//发射任务
-			if(my_command.shot)
-			{
-				flag_shot=1;
-				step_shot=0;
-			}
-			if(flag_shot)
-			{
-				Belt_Shot(my_command);
-			}
-		//吸球任务
-			if(my_command.out)
-			{
-				flag_out=1;
-				step_out=0;
-			}
-			if(flag_out)
-			{
-			Bounce_Out(my_command);
-			}
-		//危险任务
-			if(my_command.danger)
-			{
-				flag_danger=1;
-				step_danger=0;
-			}
-			if(flag_danger)
-			{
-			Danger();
-			}
- 
-			
+    // 瞄准任务
+    if (my_command.aim) {
+        if (start_task(&flag_aim, &step_aim)) {
+            // 任务已启动
+        }
+    }
+    if (flag_aim) {
+        Aim_Task(my_command);
+    }
+    
+    // 发射任务
+    if (my_command.shot) {
+        if (start_task(&flag_shot, &step_shot)) {
+            // 任务已启动
+        }
+    }
+    if (flag_shot) {
+        Belt_Shot(my_command);
+    }
+    
+    // 吸球任务
+    if (my_command.out) {
+        if (start_task(&flag_out, &step_out)) {
+            // 任务已启动
+        }
+    }
+    if (flag_out) {
+        Bounce_Out(my_command);
+    }
+    
+    // 危险任务
+    if (my_command.danger) {
+        if (start_task(&flag_danger, &step_danger)) {
+            // 任务已启动
+        }
+    }
+    if (flag_danger) {
+        Danger();
+    }
 }
 
 
@@ -177,6 +189,7 @@ void Init_Task(void)//初始化
 			break;
 		case 2:
 			flag_init=0;
+			end_task();
 			break;
 	}
 }
@@ -207,6 +220,7 @@ void Start_Task(void)//初始化
 			break;
 		case 2:
 			flag_start=0;
+			end_task();
 			break;
 	}
 }
@@ -305,6 +319,7 @@ void Bounce_Task(const ST_COMMAND my_command)
 				break;
 			case 7://结束！
 				flag_bounce=0;
+				end_task();
 				break;
 		}
 }
@@ -460,6 +475,7 @@ void Lay_Task(void)
 			if(fabs(fb_rotate-ROTATE_BOUNCE)<5)
 			{
 				flag_lay=0;
+				end_task();
 			}	
 			break;
 	}		
@@ -486,6 +502,7 @@ void 	Aim_Task(const ST_COMMAND my_command)
 			break;
 		case 1:
 			flag_aim=0;
+			end_task();
 			break;
 	}
 }
@@ -568,6 +585,7 @@ void Belt_Shot(const ST_COMMAND my_command)
 	case 6:
 		state_pitch=0;
 		flag_shot=0;
+		end_task();
 		break;
 	}
 }
@@ -608,6 +626,7 @@ void Bounce_Out(const ST_COMMAND my_command)
 				break;
 			case 3://结束！
 				flag_out=0;
+				end_task();
 				break;
 		}
 		
@@ -638,6 +657,7 @@ void Danger(void)
 			break;
 		case 2:
 			flag_danger=0;
+			end_task();
 			break;
 	}	
 }
