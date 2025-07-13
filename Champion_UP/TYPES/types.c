@@ -3,7 +3,7 @@
 //fuck the robot
 
 uint8_t usart1_rx_buff[100]={0};
-uint8_t usart1_tx_buff[18]={0};
+uint8_t usart1_tx_buff[25]={0};
 
 uint16_t des_pitch=7500;//ÔÆÌ¨¸©Ñö3508
 float des_shot=0;//·¢Éä3508
@@ -17,6 +17,8 @@ float desv_bounce_left=0;//×ó
 float desv_bounce_right=0;//ÓÒ
 
 uint8_t desq_catch=1;//ÊÕÇòÆø¸×
+uint8_t desq_danger=0;//
+uint8_t desq_defense=0;
 
 
 int fb_pitch=0;//ÔÆÌ¨¸©Ñö3508
@@ -50,7 +52,7 @@ ST_TD td_pitch =
 ST_TD td_shot = 
 { .x1 = 0, .x2 = 0, .x = 0, .r = 10000, .T = 0.001, .h = 0.002};
 ST_TD td_rotate= 
-{ .x1 = 0, .x2 = 0, .x = 0, .r = 5000, .T = 0.001, .h = 0.002};
+{ .x1 = 0, .x2 = 0, .x = 0, .r = 15000, .T = 0.001, .h = 0.002};
 
 
 //ÂË²¨Æ÷
@@ -147,9 +149,9 @@ ST_CASCADE_PID pid_shot_td = {
 
 ST_CASCADE_PID pid_rotate= {
     .inner = {
-        .fpKp = 200.0f,
-        .fpKi = 0.001f,
-        .fpKd = 200.0f,
+        .fpKp = 250.0f,
+        .fpKi = 0.0f,
+        .fpKd = 0.0f,
         .fpDes = 0.0f,
         .fpSumEMax = 10000.0f,
         .fpEMax = 10000.0f,
@@ -166,8 +168,8 @@ ST_CASCADE_PID pid_rotate= {
         .fpUKdpre = 0.0f
     },
     .outer = {
-        .fpKp = 4.0f,
-        .fpKi = 0.01f,
+        .fpKp = 5.0f,
+        .fpKi = 0.0f,
         .fpKd = 0.0f,
         .fpDes = 0.0f,
         .fpSumEMax = 10000.0f,
@@ -236,7 +238,7 @@ ST_PID pid_shot_mod = {
         .fpKd = 0.0f,
         .fpDes = 0.0f,
         .fpSumEMax = 15000.0f,
-        .fpEMax = 325.0f,
+        .fpEMax = 338.0f,
         .fpOMax = 22000.0f,
         .fpEMin = 0.0f,
         .fpFB = 0.0f,
@@ -277,7 +279,7 @@ ST_COMMAND command0={0};
 ST_SHOT shot[5]={
 {0},//0,
 {.pitch=7298,.dapao=344.8},//1
-{.pitch=7298,.dapao=344.8},//2
+{.pitch=6998,.dapao=400.0},//2
 {.pitch=7298,.dapao=344.8},//3
 {.pitch=7298,.dapao=344.8},//4
 };

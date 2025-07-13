@@ -6,12 +6,12 @@ void Usart_Control(ST_COMMAND *my_command,uint8_t rx[])
 {
 	float pitch=0;
 	float dapao=0;
-	
-if(rx[0]==0x88&&rx[29]==0xFF)
+	int8_t buchang=0;
+if(rx[0]==0x88&&rx[31]==0xFF)
 {
-    uint16_t received_crc = (rx[28] << 8) | rx[27]; // 小端模式
+    uint16_t received_crc = (rx[30] << 8) | rx[29]; // 小端模式
 		
-    uint16_t calculated_crc = crc16(&rx[1], 26);    // 计算1-26字节的CRC
+    uint16_t calculated_crc = crc16(&rx[1], 28);    // 计算1-26字节的CRC
 		
 		if(received_crc == calculated_crc)
 		{
@@ -33,21 +33,27 @@ if(rx[0]==0x88&&rx[29]==0xFF)
 		my_command->out=rx[25];
 		
 		my_command->danger=rx[26];
+		
+		my_command->protect=rx[27];		
 				
 		my_command->flag_aim=rx[7];
 		
 		my_command->number_aim=rx[8];
+		
+		memcpy(&buchang,&rx[28],1);
+		
+		my_command->buchang=buchang;
 		
 		memcpy(&pitch,&rx[17],4);
 		
 		memcpy(&dapao,&rx[21],4);
 		
 		memcpy(&yaw,&rx[13],4);
-//		
+		
 		memcpy(&distance,&rx[9],4);		
 		
 	
-//		
+		
 		if(my_command->flag_aim==1)
 		{
 			my_command->command_shot.pitch=pitch;
@@ -57,7 +63,7 @@ if(rx[0]==0x88&&rx[29]==0xFF)
 		
 		{
 			my_command->command_shot.pitch=shot[my_command->number_aim].pitch;
-			my_command->command_shot.dapao=shot[my_command->number_aim].dapao;		
+			my_command->command_shot.dapao=shot[my_command->number_aim].dapao+2*my_command->buchang;		
 		}
 		}
 }
@@ -69,9 +75,9 @@ void DC_Montor(uint16_t des,uint16_t fb,ST_PID *pid)//4900-9500
 	float fpdes=0;
 	int count1=0;
 	int count2=0;
-	if(des>8800)
+	if(des>9500)
 	{
-		fpdes=8800;
+		fpdes=9500;
 	}
 	else if(des<5200)
 	{

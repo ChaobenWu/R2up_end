@@ -281,6 +281,7 @@ void TIM4_IRQHandler(void)
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
+
 if (__HAL_UART_GET_FLAG(&huart1, UART_FLAG_IDLE) == 1)
   {
       __HAL_UART_CLEAR_IDLEFLAG(&huart1);
@@ -289,7 +290,7 @@ if (__HAL_UART_GET_FLAG(&huart1, UART_FLAG_IDLE) == 1)
 		remaining = __HAL_DMA_GET_COUNTER(huart1.hdmarx);
 //***************************************************************//
 //			HAL_UART_DMAResume(&huart1);          
-		HAL_UART_Receive_DMA(&huart1, usart1_rx_buff, 30-remaining);		
+		HAL_UART_Receive_DMA(&huart1, usart1_rx_buff, 32-remaining);		
 
 			//HAL_UART_DMAResume(&huart1);          
  }
@@ -359,4 +360,13 @@ void DMA2_Stream7_IRQHandler(void)
 
 /* USER CODE BEGIN 1 */
 
+
+
+//void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
+//{
+//	if(huart->Instance == USART1)
+//	{
+//		HAL_UARTEx_ReceiveToIdle_IT(&huart1,usart1_rx_buff,32);		// 再次开启DMA空闲中断
+//	}
+//}	
 /* USER CODE END 1 */

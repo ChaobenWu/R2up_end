@@ -239,6 +239,8 @@ typedef struct
 	int shot;
 	int out;
 	int danger;
+	int protect;
+	int buchang;
 	int flag_aim;
 	int number_aim;
 	int air_flag;	
@@ -279,7 +281,7 @@ typedef struct
 extern int state_shot;
 extern int state_pitch;
 extern uint8_t usart1_rx_buff[100];
-extern uint8_t usart1_tx_buff[18];
+extern uint8_t usart1_tx_buff[25];
 
 extern uint16_t des_pitch;//ÔÆÌ¨¸©Ñö3508
 extern float des_shot;//·¢Éä3508
@@ -291,6 +293,8 @@ extern float desv_bounce_left;//×ó
 extern float desv_bounce_right;//ÓÒ
 
 extern uint8_t desq_catch;//ÊÕÇòÆø¸×
+extern uint8_t desq_danger;//
+extern uint8_t desq_defense;
 
 extern ST_SMC g_stFrictionSMC;
 extern int fb_pitch;//ÔÆÌ¨¸©Ñö3508

@@ -4,23 +4,24 @@
 #include "types.h"
 
 
-#define PITCH_INIT           7400  // 初始位置
-#define PITCH_LAY            5000//放球位置
+#define PITCH_INIT           6400  // 初始位置
+#define PITCH_LAY            6600//放球位置
+#define PITCH_START          7200
 #define ROTATE_BOUNCE             0    // 拍球
-#define ROTATE_INIT               450    // 初始
-#define ROTATE_LAY                500    // 放球
+#define ROTATE_INIT               440    // 初始
+#define ROTATE_LAY                465    // 放球
 #define SHOT_INIT            -700 // 初始
 #define SHOT_START            -50 // 发射启动点
 #define SHOT_SHOT            -1960// 发射点
-#define SHOT_LAY            -950 // 放置
+#define SHOT_LAY            -1140 // 放置
 #define BOUNCE_LEFT_INIT    0     // 左
 #define BOUNCE_LEFT_BOUNCE    lefta    // 左正
 #define BOUNCE_LEFT_BOUNCE_U    leftb     // 左反
-#define BOUNCE_LEFT_LAY    -800    // 左
-#define BOUNCE_RIGHT_INIT   600     // 右
+#define BOUNCE_LEFT_LAY    -1000    // 
+#define BOUNCE_RIGHT_INIT   0     // 
 #define BOUNCE_RIGHT_BOUNCE    righta     // 右反
 #define BOUNCE_RIGHT_BOUNCE_U    rightb    // 右正
-#define BOUNCE_RIGHT_LAY    900    // 右
+#define BOUNCE_RIGHT_LAY    2500    // 右
 #define CATCH_CYLINDER_UNCATCH  0     // 夹球气缸
 #define CATCH_CYLINDER_CATCH  1     
 
@@ -40,6 +41,7 @@ extern uint8_t flag_init;
 extern uint8_t flag_start;
 extern uint8_t flag_out;
 extern uint8_t flag_danger;
+extern uint8_t flag_protect;
 
 extern uint8_t step_init;
 extern uint8_t step_start;
@@ -49,7 +51,7 @@ extern uint8_t step_aim;
 extern uint8_t step_shot;
 extern float Shot_Shot;
 void Logic(const ST_COMMAND my_command);
-void Init_Task(void);//初始化
+//void Init_Task(void);//初始化
 void Start_Task(void);
 void Receive_Task(void);
 void Bounce_Task(const ST_COMMAND my_command);
@@ -58,4 +60,5 @@ void Aim_Task(const ST_COMMAND my_command);
 void Belt_Shot(const ST_COMMAND my_command);
 void Bounce_Out(const ST_COMMAND my_command);
 void Danger(void);
+void Protect(void);
 #endif //__LOGIC_H__

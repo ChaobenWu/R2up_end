@@ -53,6 +53,6 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan);
 int16_t GetEncoderNumber(ST_MOTOR* motor,uint8_t msg[8]);
 float GetSpeed(CAN_RxHeaderTypeDef* pCanRxMsg,uint8_t msg[8]);
 void Abs_Encoder_Process(ST_ENCODER* pEncoder, uint32_t value);
-void SendSwitchValue(uint8_t pusSwitch);
+void SendSwitchValue(uint8_t Switch1,uint8_t Switch2,uint8_t Switch3);
 void Cacul_w(ST_MOTOR_H* motor);
 #endif // CAN1_H

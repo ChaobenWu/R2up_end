@@ -130,7 +130,9 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 
         switch(RxHeader.StdId) // 根据接收到的标准ID进行处理，得到
         {
-
+					  case 0x210: //DT35
+							memcpy(&usart1_tx_buff[13],&RxMsg_CAN1,8);
+							break;
 					  case 0x310: // 电推杆
 							fb_pitch = ((RxMsg_CAN1[1]<<8)&0xFF00)|(RxMsg_CAN1[0]&0x00FF);
 							system_monitor.rate_cnt.motor_pitch++;
@@ -292,9 +294,13 @@ void Abs_Encoder_Process(ST_ENCODER* pEncoder, uint32_t value)
 }
 
 
+//uint8_t valve_ctrl = 0; //valve为5（电磁铁） 和 6（电磁阀）
+//#define OPEN_VALVE(channel)   ( valve_ctrl |= (0x01 << (channel-1)) );SendSwitchValue(valve_ctrl)
+//#define CLOSE_VALVE(channel)  ( valve_ctrl &= ( ~(0x01 << (channel-1) ) ))SendSwitchValue(valve_ctrl)
+
 
 //气缸
-void SendSwitchValue(uint8_t pusSwitch)
+void SendSwitchValue(uint8_t Switch1,uint8_t Switch2,uint8_t Switch3)//分别对应通道1,2,3
 {
     CanTxMsg TxMessage;  // 定义发送消息的结构体
 
@@ -305,8 +311,8 @@ void SendSwitchValue(uint8_t pusSwitch)
     TxMessage.DLC = 1;              // 数据长度：2字节（16位）
 
     // 将pusSwitch的值打包成数据
-    TxMessage.Data[0] = pusSwitch;       // 低字节
-
+    TxMessage.Data[0] = (Switch1 & 0x01) | ((Switch2 & 0x01) << 1) | ((Switch3 & 0x01) << 2 )  ;    // 低字节
+		
     // 发送CAN消息
    CANX_SendStdData(&hcan1, CANRXVALVEID, TxMessage.Data, 1);
 	

@@ -206,7 +206,7 @@ void PID_Calc_Pitch(ST_PID *pstPid)
         pstPid->fpSumE += pstPid->fpE; // 累积偏差
     }
 
-    pstPid->fpSumE *= 0.99;
+    pstPid->fpSumE *= 0.99f;
     // 积分限幅
     if (pstPid->fpSumE > pstPid->fpSumEMax)
     {

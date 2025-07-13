@@ -11,6 +11,9 @@ uint8_t step_aim=0;
 uint8_t step_shot=0;
 uint8_t step_out=0;
 uint8_t step_danger=0;
+uint8_t step_protect=0;
+
+int number_protect=0;
 
 float fb_max=0;
 
@@ -52,6 +55,9 @@ int time7_1=0;
 int time7_2=0;
 int time7_3=0;
 
+
+int time8_1=0;
+
 uint8_t flag_bounce=0;
 uint8_t flag_lay=0;
 uint8_t flag_aim=0;
@@ -60,6 +66,7 @@ uint8_t flag_init=0;
 uint8_t flag_start=0;
 uint8_t flag_out=0;
 uint8_t flag_danger=0;
+uint8_t flag_protect=0;
 
 volatile uint8_t task_running = 0;  // 0: 无任务, 1: 有任务
 
@@ -83,15 +90,15 @@ void end_task(void) {
 
 void Logic(const ST_COMMAND my_command)
 {
-    // 初始化任务
-    if (my_command.init) {
-        if (start_task(&flag_init, &step_init)) {
-            // 任务已启动
-        }
-    }
-    if (flag_init) {
-        Init_Task();
-    }
+//    // 初始化任务
+//    if (my_command.init) {
+//        if (start_task(&flag_init, &step_init)) {
+//            // 任务已启动
+//        }
+//    }
+//    if (flag_init) {
+//        Init_Task();
+//    }
     
     // 启动任务
     if (my_command.start) {
@@ -145,12 +152,21 @@ void Logic(const ST_COMMAND my_command)
     
     // 吸球任务
     if (my_command.out) {
-        if (start_task(&flag_out, &step_out)) {
-            // 任务已启动
-        }
+			flag_out=1;
+			step_out=0;
     }
     if (flag_out) {
         Bounce_Out(my_command);
+    }
+
+
+    // 保护任务
+    if (my_command.protect) {
+			flag_protect=1;
+			step_protect=0;
+    }
+    if (flag_protect) {
+        Protect();
     }
     
     // 危险任务
@@ -165,55 +181,86 @@ void Logic(const ST_COMMAND my_command)
 }
 
 
-void Init_Task(void)//初始化
-{
+//void Init_Task(void)//初始化
+//{
 
-	switch (step_init)
+//	switch (step_init)
+//	{
+//		case 0://
+//			state_pitch=0;
+//			state_shot=2;
+//			desq_catch=CATCH_CYLINDER_CATCH;
+//			des_shot=SHOT_INIT;
+//			des_pitch=PITCH_INIT;
+//			if(fabs(fb_shot-SHOT_INIT)<5&&abs(fb_pitch-PITCH_INIT)<5)
+//			{
+//				step_init=1;
+//			}		
+//			break;
+//		case 1:
+//			des_rotate=ROTATE_INIT;
+//			if(fabs(fb_rotate-ROTATE_INIT)<5)
+//			{
+//				step_init=2;
+//			}
+//			break;
+//		case 2:
+//			flag_init=0;
+//			end_task();
+//			break;
+//	}
+//}
+
+void Danger(void)//收起来
+{
+	switch(step_danger)
 	{
-		case 0://
+		case 0://把球推进去，然后把云台抬起来
 			state_pitch=0;
+			state_shot=2;
 			desq_catch=CATCH_CYLINDER_CATCH;
-			des_shot=SHOT_INIT;
-			des_pitch=PITCH_INIT;
-			if(fabs(fb_shot-SHOT_INIT)<5&&abs(fb_pitch-PITCH_INIT)<5)
+			des_shot=SHOT_LAY;
+			des_pitch=PITCH_LAY;
+			if(fabs(fb_shot-SHOT_LAY)<5&&
+			abs(fb_pitch-PITCH_LAY)<10)
 			{
-				step_init=1;
-			}		
+				step_danger=1;
+			}
 			break;
 		case 1:
-			des_rotate=ROTATE_INIT;
-			if(fabs(fb_rotate-ROTATE_INIT)<5)
+			des_rotate=ROTATE_LAY;
+			if(fabs(fb_rotate-ROTATE_LAY)<5)
 			{
-				step_init=2;
+				step_danger=2;
 			}
 			break;
 		case 2:
-			flag_init=0;
+			flag_danger=0;
 			end_task();
 			break;
-	}
+	}	
 }
 
-
-
-void Start_Task(void)//初始化
+void Start_Task(void)//展开
 {
 
 	switch (step_start)
 	{
-		case 0://
-			state_pitch=0;
-			des_rotate=ROTATE_BOUNCE;
-			desq_catch=CATCH_CYLINDER_CATCH;
-			if(fabs(fb_rotate-ROTATE_BOUNCE)<5)
+
+		case 0:
+			state_shot=2;
+			des_shot=SHOT_START;
+			des_pitch=PITCH_START;
+			if(fabs(fb_shot-SHOT_START)<5&&abs(fb_pitch-PITCH_START)<5)
 			{
 				step_start=1;
 			}	
 			break;
-		case 1:
-			des_shot=SHOT_LAY;
-			des_pitch=PITCH_LAY;
-			if(fabs(fb_shot-SHOT_LAY)<5&&abs(fb_pitch-PITCH_LAY)<5)
+		case 1://
+			state_pitch=0;
+			des_rotate=ROTATE_BOUNCE;
+			desq_catch=CATCH_CYLINDER_CATCH;
+			if(fabs(fb_rotate-ROTATE_BOUNCE)<5)
 			{
 				step_start=2;
 			}	
@@ -449,7 +496,7 @@ void Lay_Task(void)
 			{
 				time3_2++;
 			}
-			if(time3_2>170)
+			if(time3_2>210)
 			{
 				desv_bounce_left=BOUNCE_LEFT_INIT;
 				desv_bounce_right=BOUNCE_RIGHT_INIT;
@@ -459,24 +506,16 @@ void Lay_Task(void)
 			break;
 		case 5://固定住球
 			time3_3++;
-			if(time3_3>70)
+			if(time3_3>300)
 			{
 				time3_3=0;
 				desq_catch=CATCH_CYLINDER_CATCH;
-				des_shot=SHOT_START;
-			}
-			if(fabs(fb_shot-SHOT_START)<800)
-			{
 				step_lay=6;
 			}
 			break;
 		case 6://小延时用来让球落下来
-			des_rotate=ROTATE_BOUNCE;
-			if(fabs(fb_rotate-ROTATE_BOUNCE)<5)
-			{
 				flag_lay=0;
 				end_task();
-			}	
 			break;
 	}		
 }
@@ -626,39 +665,32 @@ void Bounce_Out(const ST_COMMAND my_command)
 				break;
 			case 3://结束！
 				flag_out=0;
-				end_task();
 				break;
 		}
 		
 }	
 
-void Danger(void)
-{
-	switch(step_danger)
-	{
-		case 0://把球推进去，然后把云台抬起来
-			state_pitch=0;
-			state_shot=2;
-			desq_catch=CATCH_CYLINDER_CATCH;
-			des_shot=SHOT_LAY;
-			des_pitch=PITCH_LAY;
-			if(fabs(fb_shot-SHOT_LAY)<5&&
-			abs(fb_pitch-PITCH_LAY)<10)
-			{
-				step_danger=1;
-			}
-			break;
-		case 1:
-			des_rotate=ROTATE_LAY;
-			if(fabs(fb_rotate-ROTATE_LAY)<5)
-			{
-				step_danger=2;
-			}
-			break;
-		case 2:
-			flag_danger=0;
-			end_task();
-			break;
-	}	
-}
 
+
+void Protect(void)
+{
+	switch(step_protect)
+	{
+	case 0:
+
+		desq_danger=1-desq_danger;
+		step_protect=1;
+
+	break;
+	case 1:
+	time8_1++;
+	if(time8_1>200)
+	{
+		step_protect=2;
+	}
+	break;
+	case 2:
+	flag_protect=0;
+	break;
+	}
+}

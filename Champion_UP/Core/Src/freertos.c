@@ -40,7 +40,7 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 int last_state=-1;
-float kp=190;
+float kp=180;
 float ki=0.037;
 int fuck=0;
 /* USER CODE END PTD */
@@ -140,11 +140,11 @@ void MX_FREERTOS_Init(void) {
   monitorHandle = osThreadCreate(osThread(monitor), NULL);
 
   /* definition and creation of usartRX */
-  osThreadDef(usartRX, Rx_Task, osPriorityIdle, 0, 128);
+  osThreadDef(usartRX, Rx_Task, osPriorityHigh, 0, 256);
   usartRXHandle = osThreadCreate(osThread(usartRX), NULL);
 
   /* definition and creation of usartTX */
-  osThreadDef(usartTX, Tx_Task, osPriorityIdle, 0, 128);
+  osThreadDef(usartTX, Tx_Task, osPriorityIdle, 0, 256);
   usartTXHandle = osThreadCreate(osThread(usartTX), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -166,7 +166,8 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    vTaskDelay(pdMS_TO_TICKS(1));
+		Usart_Control(&command0,usart1_rx_buff);
+		vTaskDelay(pdMS_TO_TICKS(5));
   }
   /* USER CODE END StartDefaultTask */
 }
@@ -218,7 +219,8 @@ void Control_Task(void const * argument)
 		PID_Calc_DualLoop(&pid_rotate);		
 		
 		td_shot.aim=des_shot;
-		CalTD(&td_shot);			
+		CalTD(&td_shot);	
+			
 		switch(state_shot)
 		{
 			case 0:	
@@ -277,7 +279,7 @@ void Control_Task(void const * argument)
 				break;
 		}
 		CAN_SendCurrent(&hcan2,0x200,pid_rotate.output,pid_bounce_right.fpU,pid_bounce_left.fpU,0);
-		SendSwitchValue(desq_catch);//气缸
+		SendSwitchValue(desq_catch,desq_danger,desq_defense);//气缸
 		system_monitor.rate_cnt.freertos_control++;
 		vTaskDelay(pdMS_TO_TICKS(1));
   }
@@ -316,26 +318,7 @@ void Rx_Task(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-		Usart_Control(&command0,usart1_rx_buff);
-		system_monitor.rate_cnt.freertos_rx++;
-		vTaskDelay(pdMS_TO_TICKS(1));
-  }
-  /* USER CODE END Rx_Task */
-}
 
-/* USER CODE BEGIN Header_Tx_Task */
-/**
-* @brief Function implementing the usartTX thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_Tx_Task */
-void Tx_Task(void const * argument)
-{
-  /* USER CODE BEGIN Tx_Task */
-  /* Infinite loop */
-  for(;;)
-  {
 		usart1_tx_buff[0]=0x66;
 		usart1_tx_buff[1]=0x88;		
 		usart1_tx_buff[2]=0;
@@ -354,6 +337,7 @@ void Tx_Task(void const * argument)
 		usart1_tx_buff[9]=0;
 		usart1_tx_buff[10]=0;	
 		usart1_tx_buff[11]=0;	
+		usart1_tx_buff[12]=0;			
 		usart1_tx_buff[4]= flag_init;
 		usart1_tx_buff[5]=flag_start;
 		usart1_tx_buff[6]= flag_bounce;   
@@ -361,12 +345,33 @@ void Tx_Task(void const * argument)
 		usart1_tx_buff[8]= flag_aim;    
 		usart1_tx_buff[9]= flag_shot; 
 		usart1_tx_buff[10]= flag_out;	
-		usart1_tx_buff[11]= flag_danger;			
-		uint16_t crc = crc16(&usart1_tx_buff[2], 13);
-		usart1_tx_buff[15] = crc & 0xFF;       // 低字节
-		usart1_tx_buff[16] = (crc >> 8) & 0xFF; // 高字节
-		usart1_tx_buff[17]= 0xFF;  
-		HAL_UART_Transmit(&huart1,usart1_tx_buff,sizeof(usart1_tx_buff),1);
+		usart1_tx_buff[11]= flag_danger;	
+		usart1_tx_buff[12]=flag_protect;				
+		uint16_t crc = crc16(&usart1_tx_buff[2], 20);
+		usart1_tx_buff[22] = crc & 0xFF;       // 低字节
+		usart1_tx_buff[23] = (crc >> 8) & 0xFF; // 高字节
+		usart1_tx_buff[24]= 0xFF;  
+		HAL_UART_Transmit_DMA(&huart1,usart1_tx_buff,sizeof(usart1_tx_buff));
+		system_monitor.rate_cnt.freertos_rx++;
+		vTaskDelay(pdMS_TO_TICKS(5));
+  }
+  /* USER CODE END Rx_Task */
+}
+
+/* USER CODE BEGIN Header_Tx_Task */
+/**
+* @brief Function implementing the usartTX thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Tx_Task */
+void Tx_Task(void const * argument)
+{
+  /* USER CODE BEGIN Tx_Task */
+  /* Infinite loop */
+  for(;;)
+  {
+
 		DC_Montor(des_pitch,fb_pitch,&pid_pitch);
 		
 		vofa_data.ch_data[0] = des_pitch;
